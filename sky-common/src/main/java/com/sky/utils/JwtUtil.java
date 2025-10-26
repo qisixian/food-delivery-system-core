@@ -4,6 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
@@ -47,12 +50,18 @@ public class JwtUtil {
      */
     public static Claims parseJWT(String secretKey, String token) {
         // 得到DefaultJwtParser
-        Claims claims = Jwts.parser()
-                // 设置签名的秘钥
-                .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
-                // 设置需要解析的jwt
-                .parseClaimsJws(token).getBody();
-        return claims;
+//        Claims claims = Jwts.parser()
+//                // 设置签名的秘钥
+//                .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
+//                // 设置需要解析的jwt
+//                .parseClaimsJws(token).getBody();
+//        return claims;
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parser()               // 0.12.x：parser()
+                .verifyWith(key)           // 替代 setSigningKey
+                .build()                   // 先 build
+                .parseSignedClaims(token)  // 替代 parseClaimsJws
+                .getPayload();             // 替代 getBody()
     }
 
 }
