@@ -1,6 +1,7 @@
 package com.sky.controller.admin;
 
 import com.sky.constant.JwtClaimsConstant;
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
@@ -10,6 +11,7 @@ import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -81,6 +83,31 @@ public class EmployeeController {
         log.info("员工信息分页查询：{}", employeePageQueryDTO);
         PageResult pageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    @PostMapping
+    public Result save(@RequestBody EmployeeDTO employeeDTO) {
+        employeeService.save(employeeDTO);
+        return Result.success();
+    }
+
+    @PostMapping("/status/{status}")
+    @Schema(description = "启用禁用员工账号")
+    public Result<String> changeStatus(@PathVariable Integer status, @RequestParam Long id) {
+        employeeService.changeStatus(status, id);
+        return Result.success();
+    }
+
+    @GetMapping("/{id}")
+    public Result<Employee> getById(@PathVariable Long id) {
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
+    }
+
+    @PutMapping
+    public Result<String> update(@RequestBody EmployeeDTO employeeDTO){
+        employeeService.update(employeeDTO);
+        return Result.success();
     }
 
 }
