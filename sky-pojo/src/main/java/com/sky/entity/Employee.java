@@ -33,11 +33,11 @@ public class Employee implements Serializable {
 
     private Integer status;
 
-    // TODO 这个反序列化注释最好放在respVo里而不是实体类里
+    // TODO 这个反序列化注释最好放在respVo里而不是实体类里；用统一的消息转换器？converter？
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
-    // TODO 这个反序列化注释最好放在respVo里而不是实体类里
+    // TODO 这个反序列化注释最好放在respVo里而不是实体类里；用统一的消息转换器？converter？
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 

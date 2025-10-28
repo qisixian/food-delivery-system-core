@@ -2,10 +2,10 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.CurrentAccountContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.Employee;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -63,6 +62,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             //账号被锁定
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
+        // 在全局对象中保存当前登录员工的id
+        CurrentAccountContext.setId(employee.getId());
 
         //3、返回实体对象
         return employee;
@@ -87,15 +88,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         //设置初始密码123456，需要进行MD5加密
         String password = DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes());
         employee.setPassword(password);
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        // TODO 现在还拿不到当前用户是谁，create User 先写死一个固定值，后期需要改成当前登录用户的id
-        //  不过我可以从 request 里拿到 token是不是，token里是可以解析出用户id的
-        employee.setCreateUser(10L);
-        employee.setUpdateUser(10L);
-
         employeeMapper.insert(employee);
-
     }
 
     /**
@@ -107,10 +100,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = Employee.builder()
                 .id(id)
                 .status(status)
-                // TODO 这里的更新时间和更新用户感觉不应该在service层写，应该数据库自动更新才对
-                .updateTime(LocalDateTime.now())
-                // TODO 当前用户先写死一个固定值
-                .updateUser(10L)
                 .build();
         employeeMapper.update(employee);
     }
@@ -124,8 +113,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void update(EmployeeDTO employeeDTO){
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeDTO, employee);
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(10L); // TODO 当前用户先写死一个固定值
         employeeMapper.update(employee);
     }
 }
