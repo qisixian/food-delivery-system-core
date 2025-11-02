@@ -5,7 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
-import com.sky.context.CurrentAccountContext;
+import com.sky.context.UserContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.Employee;
@@ -21,14 +21,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import java.time.LocalDateTime;
-
 @Slf4j
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
+    @Autowired
+    private UserContext userContext;
 
     /**
      * 员工登录
@@ -52,7 +53,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         //密码比对
         //对前端传来的明文密码进行MD5加密
         password = DigestUtils.md5DigestAsHex(password.getBytes());
-        log.info("password: {}", password);
+        log.trace("password: {}", password);
         if (!password.equals(employee.getPassword())) {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
@@ -63,7 +64,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
         // 在全局对象中保存当前登录员工的id
-        CurrentAccountContext.setId(employee.getId());
+        userContext.set(employee.getId());
 
         //3、返回实体对象
         return employee;

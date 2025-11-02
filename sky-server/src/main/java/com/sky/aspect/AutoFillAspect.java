@@ -2,15 +2,14 @@ package com.sky.aspect;
 
 import com.sky.annotation.AutoFill;
 import com.sky.constant.AutoFillConstant;
-import com.sky.context.CurrentAccountContext;
+import com.sky.context.UserContext;
 import com.sky.enumeration.OperationType;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +19,9 @@ import java.time.LocalDateTime;
 @Component
 @Slf4j
 public class AutoFillAspect {
+
+    @Autowired
+    private UserContext userContext;
 
     @Pointcut("execution(* com.sky.mapper.*.*(..))")
     public void autoFillPointcut() {}
@@ -35,16 +37,17 @@ public class AutoFillAspect {
         }
         // 约定：如果想实现自动填充，方法的第一个参数必须是需要自动填充的对象
         Object entity = args[0];
+        Long currentUserId = userContext.get();
         if(operationType == OperationType.INSERT) {
             try {
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_TIME, LocalDateTime.class)
                         .invoke(entity, LocalDateTime.now());
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_USER, Long.class)
-                        .invoke(entity, CurrentAccountContext.getId());
+                        .invoke(entity, currentUserId);
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class)
                         .invoke(entity, LocalDateTime.now());
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class)
-                        .invoke(entity, CurrentAccountContext.getId());
+                        .invoke(entity, currentUserId);
             }
             catch (NoSuchMethodException e) {
                 log.error("Method setCreateTime not found in class: {}", entity.getClass().getName());
@@ -59,7 +62,7 @@ public class AutoFillAspect {
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class)
                         .invoke(entity, LocalDateTime.now());
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class)
-                        .invoke(entity, CurrentAccountContext.getId());
+                        .invoke(entity, currentUserId);
             }
             catch (NoSuchMethodException e) {
                 log.error("Method setUpdateTime not found in class: {}", entity.getClass().getName());

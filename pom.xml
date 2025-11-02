@@ -23,7 +23,7 @@
         <fastjson>2.0.31</fastjson>
         <commons.lang>3.19.0</commons.lang>
         <pagehelper>2.1.1</pagehelper>
-        <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
+        <aliyun.sdk.oss>3.17.4</aliyun.sdk.oss>
         <knife4j>4.4.0</knife4j>
         <aspectj>1.9.22.1</aspectj>
         <jjwt>0.12.7</jjwt>
@@ -110,10 +110,21 @@
             </dependency>
 
             <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>${jakarta.xml.bind-api}</version>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
             </dependency>
+<!--            <dependency>-->
+<!--                <groupId>javax.activation</groupId>-->
+<!--                <artifactId>activation</artifactId>-->
+<!--                <version>1.1.1</version>-->
+<!--            </dependency>-->
+<!--            &lt;!&ndash; no more than 2.3.3&ndash;&gt;-->
+<!--            <dependency>-->
+<!--                <groupId>org.glassfish.jaxb</groupId>-->
+<!--                <artifactId>jaxb-runtime</artifactId>-->
+<!--                <version>2.3.3</version>-->
+<!--            </dependency>-->
 
             <!-- poi -->
             <dependency>
