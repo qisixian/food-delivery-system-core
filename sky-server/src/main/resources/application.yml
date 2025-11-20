@@ -17,6 +17,15 @@ spring:
       port: ${sky.redis.port}
       password: ${sky.redis.password}
       database: ${sky.redis.database}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 482111489899-ottf2nos4sfi9hc8edv9s67ebao14gic.apps.googleusercontent.com
+            client-secret: secret
+            scope:
+              - email
 
 
 mybatis:
@@ -67,3 +76,9 @@ sky:
     access-key-id: ${sky.alioss.access-key-id}
     access-key-secret: ${sky.alioss.access-key-secret}
     bucket-name: ${sky.alioss.bucket-name}
+  oauth2:
+    google:
+      auth-url: https://accounts.google.com/o/oauth2/v2/auth
+      client-id: 482111489899-ottf2nos4sfi9hc8edv9s67ebao14gic.apps.googleusercontent.com
+      client-secret: secret
+      scope: email
