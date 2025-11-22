@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.CacheConstant;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
@@ -13,11 +14,14 @@ import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
+import com.sky.service.DishCacheService;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +31,9 @@ import java.util.List;
 @Slf4j
 @Service
 public class DishServiceImpl implements DishService {
+
+    @Autowired
+    DishCacheService dishCacheService;
 
     @Autowired
     DishMapper dishMapper;
@@ -56,7 +63,7 @@ public class DishServiceImpl implements DishService {
             }
             dishFlavorMapper.insertBatch(flavors);
         }
-
+        dishCacheService.evictDishCategoryCache(dishDTO.getCategoryId());
     }
 
     /**
@@ -107,6 +114,7 @@ public class DishServiceImpl implements DishService {
             }
             dishFlavorMapper.insertBatch(flavors);
         }
+        dishCacheService.evictDishCategoryCache(dishDTO.getCategoryId());
     }
 
     public void changeStatus(Integer status, Long id){
@@ -115,6 +123,7 @@ public class DishServiceImpl implements DishService {
                 .status(status)
                 .build();
         dishMapper.update(dish);
+        dishCacheService.evictDishCategoryCache(dishMapper.getById(id).getCategoryId());
     }
 
 
@@ -128,6 +137,7 @@ public class DishServiceImpl implements DishService {
      * @param categoryId
      * @return
      */
+    @Cacheable(cacheNames = CacheConstant.DISH_CATEGORY_LIST, key = "#categoryId")
     public List<DishVO> listWithFlavor(Long categoryId) {
         List<Dish> dishList = dishMapper.listByCategoryId(categoryId);
 

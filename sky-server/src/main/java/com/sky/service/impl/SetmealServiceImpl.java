@@ -2,11 +2,11 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.CacheConstant;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
-import com.sky.entity.Employee;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
 import com.sky.exception.DeletionNotAllowedException;
@@ -14,20 +14,27 @@ import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
+import com.sky.service.SetmealCacheService;
 import com.sky.service.SetmealService;
 import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
 public class SetmealServiceImpl implements SetmealService {
+
+    @Autowired
+    private SetmealCacheService setmealCacheService;
 
     @Autowired
     private SetmealMapper setmealMapper;
@@ -68,6 +75,7 @@ public class SetmealServiceImpl implements SetmealService {
             }
             setmealDishMapper.insertBatch(setmealDishes);
         }
+        setmealCacheService.evictSetmealCategoryCache(setmealDTO.getCategoryId());
     }
 
     @Transactional
@@ -86,7 +94,6 @@ public class SetmealServiceImpl implements SetmealService {
         }
     }
 
-
     public void changeStatus(Integer status, Long id) {
         if(status.equals(StatusConstant.ENABLE)){
             List<Integer> DishStatus = dishMapper.getStatusBySetmealId(id);
@@ -101,14 +108,20 @@ public class SetmealServiceImpl implements SetmealService {
                 .status(status)
                 .build();
         setmealMapper.update(setmeal);
+        setmealCacheService.evictSetmealCategoryCache(setmealMapper.getById(id).getCategoryId());
     }
 
     public void deleteBatch(List<Long> ids) {
+        Set<Long> categoryIds = new HashSet<>();
         for (Long id : ids) {
             Setmeal setmeal = setmealMapper.getById(id);
             if (setmeal.getStatus() == StatusConstant.ENABLE) {
                 throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
             }
+            categoryIds.add(setmeal.getCategoryId());
+        }
+        for (Long categoryId : categoryIds) {
+            setmealCacheService.evictSetmealCategoryCache(categoryId);
         }
         setmealMapper.deleteByIds(ids);
         setmealDishMapper.deleteBySetmealIds(ids);
@@ -119,6 +132,7 @@ public class SetmealServiceImpl implements SetmealService {
      * @param setmeal
      * @return
      */
+    @Cacheable(cacheNames = CacheConstant.SETMEAL_CATEGORY_LIST, key = "#setmeal.categoryId")
     public List<Setmeal> list(Setmeal setmeal) {
         List<Setmeal> list = setmealMapper.list(setmeal);
         return list;
