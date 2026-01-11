@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface DishMapper {
@@ -45,4 +46,6 @@ public interface DishMapper {
     // TODO 改成 getByCategoryId 比较统一
     @Select("select * from dish where category_id = #{categoryId} and status = 1 order by create_time desc")
     List<Dish> listByCategoryId(Long categoryId);
+
+    Integer countByMap(Map map);
 }

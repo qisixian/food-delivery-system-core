@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Map;
+
 @Mapper
 public interface UserMapper {
 
@@ -16,4 +18,9 @@ public interface UserMapper {
             "values (#{openid}, #{phone}, #{sex}, #{idNumber}, #{avatar}, #{createTime})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(User user);
+
+    @Select("select * from user where id = #{userId}")
+    User getById(Long userId);
+
+    Integer countByMap(Map map);
 }

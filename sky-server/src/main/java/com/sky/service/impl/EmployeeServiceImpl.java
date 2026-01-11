@@ -8,6 +8,7 @@ import com.sky.constant.StatusConstant;
 import com.sky.context.UserContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
@@ -76,7 +77,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeePageQueryDTO
      * @return
      */
-    public PageResult pageQuery(com.sky.dto.EmployeePageQueryDTO employeePageQueryDTO) {
+    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
         Page<Employee> page = employeeMapper.pageQuery();
         return new PageResult(page.getTotal(), page.getResult());
