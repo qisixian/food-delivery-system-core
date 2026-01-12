@@ -20,7 +20,7 @@ public interface EmployeeService {
      * @param employeePageQueryDTO
      * @return
      */
-    PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+    PageResult<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
 
     void save(EmployeeDTO employeeDTO);
 

@@ -10,7 +10,7 @@ import com.sky.vo.SetmealVO;
 import java.util.List;
 
 public interface SetmealService {
-    PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+    PageResult<SetmealVO> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
 
     void save(SetmealDTO setmealDTO);
 

@@ -77,10 +77,10 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeePageQueryDTO
      * @return
      */
-    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+    public PageResult<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
         Page<Employee> page = employeeMapper.pageQuery();
-        return new PageResult(page.getTotal(), page.getResult());
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     public void save(EmployeeDTO employeeDTO) {

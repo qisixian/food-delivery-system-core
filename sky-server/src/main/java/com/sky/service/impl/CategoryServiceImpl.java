@@ -54,11 +54,11 @@ public class CategoryServiceImpl implements CategoryService {
      * @param categoryPageQueryDTO
      * @return
      */
-    public PageResult pageQuery(CategoryPageQueryDTO categoryPageQueryDTO) {
+    public PageResult<Category> pageQuery(CategoryPageQueryDTO categoryPageQueryDTO) {
         PageHelper.startPage(categoryPageQueryDTO.getPage(),categoryPageQueryDTO.getPageSize());
         //下一条sql进行分页，自动加入limit关键字分页
         Page<Category> page = categoryMapper.pageQuery(categoryPageQueryDTO);
-        return new PageResult(page.getTotal(), page.getResult());
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     /**

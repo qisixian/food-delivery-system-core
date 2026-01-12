@@ -44,10 +44,10 @@ public class DishServiceImpl implements DishService {
     @Autowired
     SetmealDishMapper setmealDishMapper;
 
-    public PageResult pageQuery(DishPageQueryDTO dishPageQueryDTO) {
+    public PageResult<DishVO> pageQuery(DishPageQueryDTO dishPageQueryDTO) {
         PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
         Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
-        return new PageResult(page.getTotal(), page.getResult());
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
     // 涉及到多表操作，需要开启事务保证数据一致性

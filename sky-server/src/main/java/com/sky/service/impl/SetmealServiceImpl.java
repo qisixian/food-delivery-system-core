@@ -46,10 +46,10 @@ public class SetmealServiceImpl implements SetmealService {
     private DishMapper dishMapper;
 
 
-    public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO){
+    public PageResult<SetmealVO> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO){
         PageHelper.startPage(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
         Page<SetmealVO> page = setmealMapper.pageQuery(setmealPageQueryDTO);
-        return new PageResult(page.getTotal(), page.getResult());
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 
 
