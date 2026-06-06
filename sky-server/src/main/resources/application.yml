@@ -17,15 +17,6 @@ spring:
       port: ${sky.redis.port}
       password: ${sky.redis.password}
       database: ${sky.redis.database}
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 482111489899-ottf2nos4sfi9hc8edv9s67ebao14gic.apps.googleusercontent.com
-            client-secret: secret
-            scope:
-              - email
 
 
 mybatis:
@@ -41,7 +32,7 @@ logging:
     com.sky.mapper: debug
     com.sky.service: info
     com.sky.controller: info
-#    com.sky.controller.admin.DishController: trace
+    com.sky.controller.user.OrderController: trace
 #    com.sky.controller.admin.SetmealController: trace
 
 # springdoc-openapi项目配置
@@ -71,6 +62,8 @@ sky:
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+    user-secret-key: GQmANafNXXEPv5Dq2pwqqnIi0Z1lQbP+2WTQkd3CLhM=
+    user-ttl: 7200000
   alioss:
     endpoint: ${sky.alioss.endpoint}
     access-key-id: ${sky.alioss.access-key-id}
@@ -79,6 +72,9 @@ sky:
   oauth2:
     google:
       auth-url: https://accounts.google.com/o/oauth2/v2/auth
-      client-id: 482111489899-ottf2nos4sfi9hc8edv9s67ebao14gic.apps.googleusercontent.com
-      client-secret: secret
-      scope: email
+      client-id: ${OAUTH_GOOGLE_CLIENT_ID:}
+      client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:}
+      redirect-uri: http://localhost:8080/user/auth/google/callback
+      token-url: https://oauth2.googleapis.com/token
+      scope: openid
+      frontend-callback-url: http://localhost:5173/oauth/callback

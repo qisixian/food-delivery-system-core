@@ -5,11 +5,11 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into orders (number, status, user_id, address_book_id, order_time, checkout_time, pay_method, pay_status,
-                            amount, remark, phone, consignee, estimated_delivery_time, delivery_status,
-                            pack_amount, tableware_amount, tableware_status)
+                            amount, remark, phone, address, consignee, estimated_delivery_time, delivery_status,
+                            pack_amount, tableware_number, tableware_status)
         values (#{number}, #{status}, #{userId}, #{addressBookId}, #{orderTime}, #{checkoutTime}, #{payMethod},
-                #{payStatus}, #{amount}, #{remark}, #{phone}, #{consignee}, #{estimatedDeliveryTime}, #{deliveryStatus},
-                #{packAmount}, #{tablewareAmount}, #{tablewareStatus})
+                #{payStatus}, #{amount}, #{remark}, #{phone}, #{address}, #{consignee}, #{estimatedDeliveryTime}, #{deliveryStatus},
+                #{packAmount}, #{tablewareNumber}, #{tablewareStatus})
     </insert>
 
     <update id="update" parameterType="com.sky.entity.Orders">
@@ -85,5 +85,35 @@
         group by od.name
         order by od.number desc
         limit 10
+    </select>
+
+    <select id="pageQuery" resultType="com.sky.vo.OrderVO">
+        select * from orders o
+        <where>
+            <if test="number != null and number != ''">
+                and o.number like concat('%',#{number},'%')
+            </if>
+            <if test="phone != null and phone != ''">
+                and o.phone = #{phone}
+            </if>
+            <if test="status != null">
+                and o.status = #{status}
+            </if>
+            <if test="beginTime != null">
+                and o.order_time = #{beginTime}
+            </if>
+            <if test="endTime != null">
+                and o.order_time = #{endTime}
+            </if>
+        </where>
+        order by o.order_time desc
+    </select>
+    <select id="statistics" resultType="com.sky.vo.OrderStatisticsVO">
+--         toBeConfirmed confirmed deliveryInProgress
+        select
+            sum(case when status = 2 then 1 else 0 end) toBeConfirmed,
+            sum(case when status = 3 then 1 else 0 end) confirmed,
+            sum(case when status = 4 then 1 else 0 end) deliveryInProgress
+        from orders
     </select>
 </mapper>

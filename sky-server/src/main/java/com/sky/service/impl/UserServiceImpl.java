@@ -49,4 +49,20 @@ public class UserServiceImpl implements UserService {
         // 返回这个用户对象
         return user;
     }
+
+    public User gerOrCreateUser(String openid) {
+        // 判断当前用户是否为新用户
+        User user = userMapper.getByOpenid(openid);
+
+        // 如果是新用户，自动注册
+        if (user == null) {
+            user = User.builder()
+                    .openid(openid)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            userMapper.insert(user);
+        }
+
+        return user;
+    }
 }

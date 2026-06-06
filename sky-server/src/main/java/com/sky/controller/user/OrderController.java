@@ -1,15 +1,24 @@
 package com.sky.controller.user;
 
+import com.sky.constant.MessageConstant;
+import com.sky.context.UserContext;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
+import com.sky.exception.OrderBusinessException;
+import com.sky.exception.UserNotLoginException;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
+import com.sky.vo.DishVO;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Objects;
 
 @RestController("userOrderController")
 @RequestMapping("/user/order")
@@ -19,12 +28,15 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private UserContext userContext;
+
     @PostMapping("/submit")
     @Schema(description = "用户下单")
     public Result<OrderSubmitVO> submit(@RequestBody OrdersSubmitDTO ordersSubmitDTO) {
         log.trace("用户下单: {}", ordersSubmitDTO);
         OrderSubmitVO orderSubmitVO = orderService.submitOrder(ordersSubmitDTO);
-        return Result.success();
+        return Result.success(orderSubmitVO);
     }
 
     /**
@@ -37,8 +49,11 @@ public class OrderController {
     @Schema(description = "订单支付")
     public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         log.info("订单支付：{}", ordersPaymentDTO);
-        OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
+//        OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
+        OrderPaymentVO orderPaymentVO = new OrderPaymentVO();
         log.info("生成预支付交易单：{}", orderPaymentVO);
+        // 模拟支付成功
+        orderService.paySuccess(ordersPaymentDTO.getOrderNumber());
         return Result.success(orderPaymentVO);
     }
 
@@ -47,5 +62,23 @@ public class OrderController {
     public Result reminder(@PathVariable Long id) {
         orderService.reminder(id);
         return Result.success();
+    }
+
+    @GetMapping("/{orderNumber}")
+    public Result<OrderVO> get(@PathVariable String orderNumber){
+        log.trace("根据订单号查询订单：{}", orderNumber);
+        OrderVO ordersVO = orderService.getByOrderNumber(orderNumber);
+        if (!Objects.equals(ordersVO.getUserId(), userContext.get())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        return Result.success(ordersVO);
+    }
+
+    @GetMapping("/list")
+    public Result<List<OrderVO>> list(){
+        log.trace("查询用户所有订单");
+        Long userId = userContext.get();
+        List<OrderVO> ordersVO = orderService.listByUser(userId);
+        return Result.success(ordersVO);
     }
 }

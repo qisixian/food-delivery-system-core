@@ -14,4 +14,5 @@ public class GoogleLoginProperties {
     private String clientSecret;
     private String redirectUri;
     private String scope;
+    private String frontendCallbackUrl;
 }

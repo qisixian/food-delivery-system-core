@@ -1,5 +1,7 @@
 package com.sky.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,6 +45,7 @@ public class Orders implements Serializable {
     private String number;
 
     //订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消 7退款
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer status;
 
     //下单用户id
@@ -52,18 +55,25 @@ public class Orders implements Serializable {
     private Long addressBookId;
 
     //下单时间
+    // TODO 这个反序列化注释最好放在respVo里而不是实体类里；用统一的消息转换器？converter？
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime orderTime;
 
     //结账时间
+    // TODO 这个反序列化注释最好放在respVo里而不是实体类里；用统一的消息转换器？converter？
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime checkoutTime;
 
     //支付方式 1微信，2支付宝
     private Integer payMethod;
 
     //支付状态 0未支付 1已支付 2退款
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer payStatus;
 
     //实收金额
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private BigDecimal amount;
 
     //备注
@@ -88,15 +98,21 @@ public class Orders implements Serializable {
     private String rejectionReason;
 
     //订单取消时间
+    // TODO 这个反序列化注释最好放在respVo里而不是实体类里；用统一的消息转换器？converter？
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime cancelTime;
 
     //预计送达时间
+    // TODO 这个反序列化注释最好放在respVo里而不是实体类里；用统一的消息转换器？converter？
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime estimatedDeliveryTime;
 
     //配送状态  1立即送出  0选择具体时间
     private Integer deliveryStatus;
 
     //送达时间
+    // TODO 这个反序列化注释最好放在respVo里而不是实体类里；用统一的消息转换器？converter？
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deliveryTime;
 
     //打包费

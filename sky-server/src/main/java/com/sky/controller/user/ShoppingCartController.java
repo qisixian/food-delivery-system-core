@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import com.sky.context.UserContext;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.ShoppingCart;
 import com.sky.result.Result;
@@ -18,6 +19,9 @@ public class ShoppingCartController {
     @Autowired
     private ShoppingCartService shoppingCartService;
 
+    @Autowired
+    private UserContext userContext;
+
     @PostMapping("/add")
     public Result add(@RequestBody ShoppingCartDTO shoppingCartDTO) {
         log.trace("添加商品到购物车：{}", shoppingCartDTO);
@@ -25,8 +29,19 @@ public class ShoppingCartController {
         return Result.success();
     }
 
+    @PostMapping("/sub")
+    public Result sub(@RequestBody ShoppingCartDTO shoppingCartDTO) {
+        log.trace("从购物车中减少商品：{}", shoppingCartDTO);
+        shoppingCartService.removeShoppingCart(shoppingCartDTO);
+        return Result.success();
+    }
+
     @GetMapping("/list")
     public Result<List<ShoppingCart>> list() {
+        if (userContext.get() == null) {
+            System.out.println("用户未登录，无法查询购物车");
+            return Result.success();
+        }
         List<ShoppingCart> list = shoppingCartService.showShoppingCart();
         return Result.success(list);
     }

@@ -2,19 +2,20 @@ package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson2.JSON;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.UserContext;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
-import com.sky.vo.OrderPaymentVO;
-import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.*;
 import com.sky.websocket.WebSocketServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,8 @@ public class OrderServiceImpl implements OrderService {
         orders.setPhone(addressBook.getPhone());
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);
-
+        orders.setAddress(addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getCityName() + addressBook.getDetail());
+        System.out.println("orders address = " + orders.getAddress());
         orderMapper.insert(orders);
 
         // 插入订单明细表
@@ -151,8 +153,8 @@ public class OrderServiceImpl implements OrderService {
         // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
         Orders orders = Orders.builder()
                 .id(ordersDB.getId())
-                .status(Orders.TO_BE_CONFIRMED)
                 .payStatus(Orders.PAID)
+                .status(Orders.TO_BE_CONFIRMED)
                 .checkoutTime(LocalDateTime.now())
                 .build();
 
@@ -182,5 +184,105 @@ public class OrderServiceImpl implements OrderService {
         map.put("content", "订单号：" + id);
         String message = JSON.toJSONString(map);
         webSocketServer.sendToAllClient(JSON.toJSONString(map));
+    }
+
+    @Override
+    public List<OrderVO> listByUser(Long userId) {
+        List<Orders> ordersList = orderMapper.listByUserId(userId);
+        List<OrderVO> orderVOList = new ArrayList<>();
+        for (Orders orders : ordersList) {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+            List<OrderDetail> details = orderDetailMapper.listByOrderId(orders.getId());
+            orderVO.setOrderDetailList(details);
+            orderVOList.add(orderVO);
+        }
+        return orderVOList;
+    }
+
+    @Override
+    public OrderVO getByOrderNumber(String orderNumber) {
+        // 根据订单号查询订单
+        Orders ordersDB = orderMapper.getByNumber(orderNumber);
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(ordersDB, orderVO);
+        List<OrderDetail> details = orderDetailMapper.listByOrderId(ordersDB.getId());
+        List<String> names = new ArrayList<>();
+        for (OrderDetail detail : details) {
+            names.add(detail.getName());
+        }
+        orderVO.setOrderDetailList(details);
+        orderVO.setOrderDishes(String.join(", ", names));
+        return orderVO;
+    }
+
+    @Override
+    public OrderVO getById(Long id) {
+        // 根据订单id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(ordersDB, orderVO);
+        List<OrderDetail> details = orderDetailMapper.listByOrderId(id);
+        List<String> names = new ArrayList<>();
+        for (OrderDetail detail : details) {
+            names.add(detail.getName());
+        }
+        orderVO.setOrderDetailList(details);
+        orderVO.setOrderDishes(String.join(", ", names));
+        return orderVO;
+    }
+
+    @Override
+    public PageResult<Orders> pageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+        return new PageResult<>(page.getTotal(), page.getResult());
+    }
+
+    @Override
+    public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
+        Orders order = new Orders();
+        order.setId(ordersConfirmDTO.getId());
+        order.setStatus(Orders.CONFIRMED);
+        orderMapper.update(order);
+    }
+
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+        Orders order = new Orders();
+        BeanUtils.copyProperties(ordersRejectionDTO, order);
+        order.setStatus(Orders.CANCELLED);
+        orderMapper.update(order);
+    }
+
+    @Override
+    public void delivery(Long id) {
+        Orders order = new Orders();
+        order.setId(id);
+        order.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        orderMapper.update(order);
+    }
+
+    @Override
+    public void complete(Long id) {
+        Orders order = new Orders();
+        order.setId(id);
+        order.setStatus(Orders.COMPLETED);
+        orderMapper.update(order);
+    }
+
+    @Override
+    public void cancel(OrdersCancelDTO ordersCancelDTO) {
+        Orders order = new Orders();
+        BeanUtils.copyProperties(ordersCancelDTO, order);
+        order.setStatus(Orders.CANCELLED);
+        orderMapper.update(order);
+    }
+
+
+    @Override
+    public OrderStatisticsVO statistics() {
+        OrderStatisticsVO orderStatisticsVO = orderMapper.statistics();
+        return orderStatisticsVO;
     }
 }

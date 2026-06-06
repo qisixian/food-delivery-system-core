@@ -1,5 +1,6 @@
 package com.sky.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,14 +26,18 @@ public class SetmealDish implements Serializable {
     private Long setmealId;
 
     //菜品id
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Long dishId;
 
     //菜品名称 （冗余字段）
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     //菜品原价
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private BigDecimal price;
 
     //份数
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer copies;
 }
