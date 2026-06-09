@@ -18,6 +18,7 @@
         <module>sky-server</module>
     </modules>
     <properties>
+        <java.version>21</java.version>
         <mybatis.spring>3.0.3</mybatis.spring>
         <lombok>1.18.42</lombok>
         <fastjson>2.0.31</fastjson>

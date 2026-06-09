@@ -44,7 +44,6 @@ public class GoogleAuthController {
     @GetMapping("login")
     public Result<String> googleLogin(HttpServletResponse response) throws IOException {
         log.info("hellohello, this is Google登录");
-        log.info("googleLoginProperties.getClientId(): " + googleLoginProperties.getClientId());
 
         String authorizationUrl = UriComponentsBuilder
                 .fromUriString(googleLoginProperties.getAuthUrl())
