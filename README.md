@@ -3,15 +3,16 @@
 
 ./mvnw clean package
 
-podman build -t my-springboot-app:1.0 .
+podman build -t food-delivery-system-core:1.0 .
 
-podman stop my-springboot-app
-podman rm my-springboot-app
+podman stop food-delivery-system-core
+
+podman rm food-delivery-system-core
 
 podman run -d \
-    --name my-springboot-app \
+    --name food-delivery-system-core \
     -p 8080:8080 \
     --env-file .env \
-    my-springboot-app:1.0
+    food-delivery-system-core:1.0
 
-podman logs -f my-springboot-app
+podman logs -f food-delivery-system-core
