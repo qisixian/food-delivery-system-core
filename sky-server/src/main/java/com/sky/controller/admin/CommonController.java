@@ -19,21 +19,21 @@ import java.util.UUID;
 @Slf4j
 public class CommonController {
 
-    @Autowired
-    private AliOssUtil aliOssUtil;
-
-    @PostMapping("/upload")
-    @Schema(description = "文件上传")
-    public Result<String> upload(MultipartFile file) {
-
-        try {
-            String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-            String fileName = UUID.randomUUID().toString() + extension;
-            String filePath = aliOssUtil.upload(file.getBytes(), fileName);
-            return Result.success(filePath);
-        } catch (IOException e) {
-            log.error("文件上传失败: {}", e.getMessage());
-            return Result.error(MessageConstant.UPLOAD_FAILED);
-        }
-    }
+//    @Autowired
+//    private AliOssUtil aliOssUtil;
+//
+//    @PostMapping("/upload")
+//    @Schema(description = "文件上传")
+//    public Result<String> upload(MultipartFile file) {
+//
+//        try {
+//            String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+//            String fileName = UUID.randomUUID().toString() + extension;
+//            String filePath = aliOssUtil.upload(file.getBytes(), fileName);
+//            return Result.success(filePath);
+//        } catch (IOException e) {
+//            log.error("文件上传失败: {}", e.getMessage());
+//            return Result.error(MessageConstant.UPLOAD_FAILED);
+//        }
+//    }
 }

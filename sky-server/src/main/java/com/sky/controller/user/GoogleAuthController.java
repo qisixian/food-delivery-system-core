@@ -10,9 +10,11 @@ import com.sky.result.Result;
 import com.sky.service.UserService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.UserLoginVO;
+import io.opentelemetry.api.trace.Span;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Controller;
@@ -43,7 +45,6 @@ public class GoogleAuthController {
 
     @GetMapping("login")
     public Result<String> googleLogin(HttpServletResponse response) throws IOException {
-        log.info("hellohello, this is Google登录");
 
         String authorizationUrl = UriComponentsBuilder
                 .fromUriString(googleLoginProperties.getAuthUrl())
@@ -65,7 +66,7 @@ public class GoogleAuthController {
     @GetMapping("callback")
     public Result<String> googleCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String code = request.getParameter("code");
-        log.info("Google登录回调，code: {}", code);
+//        log.debug("Google login callback，code: {}", code);
         // 使用 code 交换 access token
         GoogleTokenResponseDTO googleTokenResponseDTO = WebClient.create()
                 .post()
@@ -79,8 +80,8 @@ public class GoogleAuthController {
                 .bodyToMono(GoogleTokenResponseDTO.class)
                 .block();
 
-        log.info("Google Token Response: {}", googleTokenResponseDTO.toString());
-        log.info("id_token: {}", googleTokenResponseDTO.getIdToken());
+//        log.debug("Google Token Response: {}", googleTokenResponseDTO.toString());
+//        log.debug("id_token: {}", googleTokenResponseDTO.getIdToken());
 
         // 使用 access token 获取用户信息
         // 但是其实 JWT解析 id_token 就能拿到用户信息了，不需要再发请求了
@@ -93,13 +94,14 @@ public class GoogleAuthController {
                 .bodyToMono(JsonNode.class)
                 .block();
         String googleOpenId = userInfo.get("id").asText();
-        log.info("user id: {}", googleOpenId);
+//        log.debug("googleOpenId: {}", googleOpenId);
 
         // 看是否要创建用户
         User user = userService.gerOrCreateUser(googleOpenId);
 
-        // 换成自己系统的用户id，生成JWT
+        log.atInfo().addKeyValue("userId", user.getId()).log("Google login success");
 
+        // 换成自己系统的用户id，生成JWT
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = JwtUtil.createJWT(

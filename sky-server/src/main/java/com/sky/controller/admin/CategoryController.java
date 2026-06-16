@@ -29,7 +29,6 @@ public class CategoryController {
      */
     @PostMapping
     public Result<String> save(@RequestBody CategoryDTO categoryDTO){
-        log.info("新增分类：{}", categoryDTO);
         categoryService.save(categoryDTO);
         return Result.success();
     }
@@ -41,7 +40,6 @@ public class CategoryController {
      */
     @GetMapping("/page")
     public Result<PageResult<Category>> page(CategoryPageQueryDTO categoryPageQueryDTO){
-        log.info("分页查询：{}", categoryPageQueryDTO);
         PageResult<Category> pageResult = categoryService.pageQuery(categoryPageQueryDTO);
         return Result.success(pageResult);
     }
@@ -53,7 +51,6 @@ public class CategoryController {
      */
     @DeleteMapping
     public Result<String> deleteById(Long id){
-        log.info("删除分类：{}", id);
         categoryService.deleteById(id);
         return Result.success();
     }

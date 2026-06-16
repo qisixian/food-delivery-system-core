@@ -10,6 +10,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -58,11 +59,13 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
 
         //2、校验令牌
         try {
-            log.info("jwt校验:{}", token);
+//            log.debug("jwt校验:{}", token);
             Claims claims = JwtUtil.parseJWT(jwtProperties.getUserSecretKey(), token);
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
-            log.info("当前顾客id：{}", userId);
+//            log.debug("当前顾客id：{}", userId);
             userContext.set(userId);
+            MDC.put("userId", Objects.toString(userId));
+            MDC.put("isEmployee", "false");
             //3、通过，放行
             return true;
         } catch (Exception ex) {

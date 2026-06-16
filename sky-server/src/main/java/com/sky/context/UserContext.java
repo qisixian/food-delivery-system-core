@@ -16,7 +16,9 @@ public class UserContext {
 
     public void set(Long id) {
         USER_ID.set(id);
-        log.info("[Thread:{}] set userId={}", Thread.currentThread().getName(), id);
+        log.atDebug()
+                .addKeyValue("userId", id)
+                .log("set userId");
     }
 
     public Long get() {
@@ -24,7 +26,9 @@ public class UserContext {
     }
 
     public void remove() {
-        log.info("[Thread:{}] clear userId={}", Thread.currentThread().getName(), USER_ID.get());
+        log.atDebug()
+                .addKeyValue("userId", USER_ID.get())
+                .log("clear userId");
         USER_ID.remove();
     }
 

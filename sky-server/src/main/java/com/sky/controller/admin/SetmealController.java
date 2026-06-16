@@ -25,7 +25,6 @@ public class SetmealController {
 
     @GetMapping("/page")
     public Result<PageResult<SetmealVO>> page(SetmealPageQueryDTO setmealPageQueryDTO) {
-        log.trace("套餐信息分页查询：{}", setmealPageQueryDTO);
         PageResult<SetmealVO> pageResult = setmealService.pageQuery(setmealPageQueryDTO);
         return Result.success(pageResult);
     }
@@ -33,21 +32,18 @@ public class SetmealController {
 
     @GetMapping("/{id}")
     public Result<SetmealVO> getById(@PathVariable Long id){
-        log.trace("根据id查询套餐：{}", id);
         SetmealVO setmeal = setmealService.getByIdWithDish(id);
         return Result.success(setmeal);
     }
 
     @PostMapping
     public Result save(@RequestBody SetmealDTO setmealDTO){
-        log.trace("新增套餐：{}", setmealDTO);
         setmealService.save(setmealDTO);
         return Result.success();
     }
 
     @PutMapping
     public Result update(@RequestBody SetmealDTO setmealDTO){
-        log.trace("修改套餐：{}", setmealDTO);
         setmealService.updateWithDish(setmealDTO);
         return Result.success();
     }
@@ -63,7 +59,6 @@ public class SetmealController {
 
     @DeleteMapping
     public Result delete(@RequestParam List<Long> ids){
-        log.trace("删除套餐：{}", ids);
         setmealService.deleteBatch(ids);
         return Result.success();
     }

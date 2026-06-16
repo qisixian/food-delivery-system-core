@@ -50,11 +50,11 @@ public class AutoFillAspect {
                         .invoke(entity, currentUserId);
             }
             catch (NoSuchMethodException e) {
-                log.error("Method setCreateTime not found in class: {}", entity.getClass().getName());
+                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Method setCreateTime not found in class: {}", entity.getClass().getName());
             } catch (IllegalAccessException e) {
-                log.error("Illegal access when invoking setCreateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Illegal access when invoking setCreateTime on class: {}", entity.getClass().getName());
             } catch (InvocationTargetException e) {
-                log.error("Invocation target exception when invoking setCreateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Invocation target exception when invoking setCreateTime on class: {}", entity.getClass().getName());
             }
         }
         if (operationType == OperationType.UPDATE) {
@@ -65,11 +65,11 @@ public class AutoFillAspect {
                         .invoke(entity, currentUserId);
             }
             catch (NoSuchMethodException e) {
-                log.error("Method setUpdateTime not found in class: {}", entity.getClass().getName());
+                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Method setUpdateTime not found in class: {}", entity.getClass().getName());
             } catch (IllegalAccessException e) {
-                log.error("Illegal access when invoking setUpdateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Illegal access when invoking setUpdateTime on class: {}", entity.getClass().getName());
             } catch (InvocationTargetException e) {
-                log.error("Invocation target exception when invoking setUpdateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Invocation target exception when invoking setUpdateTime on class: {}", entity.getClass().getName());
             }
         }
     }

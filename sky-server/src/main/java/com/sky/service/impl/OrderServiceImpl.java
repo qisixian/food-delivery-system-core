@@ -14,9 +14,10 @@ import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
-import com.sky.utils.WeChatPayUtil;
+//import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.*;
 import com.sky.websocket.WebSocketServer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -50,8 +52,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserContext userContext;
 
-    @Autowired
-    private WeChatPayUtil weChatPayUtil;
+//    @Autowired
+//    private WeChatPayUtil weChatPayUtil;
 
     @Autowired
     private WebSocketServer webSocketServer;
@@ -84,7 +86,6 @@ public class OrderServiceImpl implements OrderService {
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);
         orders.setAddress(addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getCityName() + addressBook.getDetail());
-        System.out.println("orders address = " + orders.getAddress());
         orderMapper.insert(orders);
 
         // 插入订单明细表
@@ -99,6 +100,10 @@ public class OrderServiceImpl implements OrderService {
 
         // 清空购物车
         shoppingCartMapper.deleteByUserId(userId);
+
+        log.atInfo()
+            .addKeyValue("orderId", orders.getId())
+            .log("Submit order success");
 
         // 返回结果
         OrderSubmitVO orderSubmitVO = OrderSubmitVO.builder()
@@ -123,12 +128,13 @@ public class OrderServiceImpl implements OrderService {
         User user = userMapper.getById(userId);
 
         //调用微信支付接口，生成预支付交易单
-        JSONObject jsonObject = weChatPayUtil.pay(
-                ordersPaymentDTO.getOrderNumber(), //商户订单号
-                new BigDecimal(0.01), //支付金额，单位 元
-                "苍穹外卖订单", //商品描述
-                user.getOpenid() //微信用户的openid
-        );
+//        JSONObject jsonObject = weChatPayUtil.pay(
+//                ordersPaymentDTO.getOrderNumber(), //商户订单号
+//                new BigDecimal(0.01), //支付金额，单位 元
+//                "苍穹外卖订单", //商品描述
+//                user.getOpenid() //微信用户的openid
+//        );
+        JSONObject jsonObject = new JSONObject();
 
         if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
             throw new OrderBusinessException("该订单已支付");
@@ -159,6 +165,10 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        log.atInfo()
+            .addKeyValue("orderId", ordersDB.getId())
+            .log("Payment success");
 
         // 通过WebSocket服务器给管理员端发送来单通知
         Map map = new HashMap<>();

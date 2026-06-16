@@ -18,6 +18,11 @@ spring:
       password: ${sky.redis.password}
       database: ${sky.redis.database}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus # loggers # 需要鉴权保护
 
 mybatis:
   #mapper配置文件
@@ -28,12 +33,50 @@ mybatis:
     map-underscore-to-camel-case: true
 
 logging:
+  structured:
+    format:
+      console: logstash
   level:
-    com.sky.mapper: debug
+    com.sky.mapper: info
     com.sky.service: info
     com.sky.controller: info
-    com.sky.controller.user.OrderController: trace
+#    com.sky.controller.user.OrderController: trace
 #    com.sky.controller.admin.SetmealController: trace
+
+otel:
+  java:
+    disabled:
+      resource:
+        providers: io.opentelemetry.instrumentation.resources.ProcessResourceProvider
+  service:
+    name: food-delivery-system-core
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
+      protocol: http/protobuf
+  traces:
+    exporter: otlp
+  logs:
+    exporter: otlp
+  metrics:
+    exporter: none
+  instrumentation:
+    common:
+      default-enabled: false
+    logback-appender:
+      enabled: true
+      experimental:
+        capture-mdc-attributes: '*'
+        capture-key-value-pair-attributes: true
+    logback-mdc:
+      enabled: true
+    spring-web:
+      enabled: true
+    spring-webmvc:
+      enabled: true
+    jdbc:
+      enabled: true
+
 
 # springdoc-openapi项目配置
 springdoc:

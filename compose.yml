@@ -1,0 +1,53 @@
+services:
+
+  food-delivery-system-core:
+    image: food-delivery-system-core:latest
+    container_name: food-delivery-system-core
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./ops/otel-collector-config.yaml:/etc/otelcol/config.yaml
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./ops/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./ops/loki-config.yaml:/etc/loki/loki-config.yaml
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    ports:
+      - "3200:3200"
+      - "4319:4319"
+      - "4320:4320"
+    volumes:
+      - ./ops/tempo.yaml:/etc/tempo.yaml
+    command:
+      - "-config.file=/etc/tempo.yaml"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+#    restart: unless-stopped

@@ -19,7 +19,6 @@ public class ShopController {
     @Schema(description = "获取店铺营业状态")
     public Result getStatus() {
         Integer status = (Integer) redisTemplate.opsForValue().get("shop_status");
-        log.trace("获取店铺营业状态为: {}", status);
         return Result.success(status);
     }
 }

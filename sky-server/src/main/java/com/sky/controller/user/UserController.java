@@ -28,7 +28,6 @@ public class UserController {
 
     @PostMapping("/login")
     public Result<UserLoginVO> login(@RequestBody UserLoginDTO userLoginDTO) {
-        log.info("用户登录");
         // 先登录
         User user = userService.googleLogin(userLoginDTO);
         // 然后为用户生成JWT令牌？JWT是应该由我生成的？不是Google给的？

@@ -54,7 +54,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         //密码比对
         //对前端传来的明文密码进行MD5加密
         password = DigestUtils.md5DigestAsHex(password.getBytes());
-        log.trace("password: {}", password);
+//        log.trace("password: {}", password);
         if (!password.equals(employee.getPassword())) {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
@@ -64,8 +64,6 @@ public class EmployeeServiceImpl implements EmployeeService {
             //账号被锁定
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
-        // 在全局对象中保存当前登录员工的id
-        userContext.set(employee.getId());
 
         //3、返回实体对象
         return employee;

@@ -18,7 +18,6 @@ public class ShopController {
     @PutMapping("/{status}")
     @Schema(description = "设置店铺营业状态")
     public Result setStatus(@PathVariable Integer status) {
-        log.trace("设置店铺营业状态: {}", status);
         redisTemplate.opsForValue().set("shop_status", status);
         return Result.success();
     }
@@ -27,7 +26,6 @@ public class ShopController {
     @Schema(description = "获取店铺营业状态")
     public Result getStatus() {
         Integer status = (Integer) redisTemplate.opsForValue().get("shop_status");
-        log.trace("获取店铺营业状态为: {}", status);
         return Result.success(status);
     }
 }

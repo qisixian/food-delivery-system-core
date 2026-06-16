@@ -41,7 +41,6 @@ public class EmployeeController {
     // TODO: 为什么这个接口不会被拦截呢？
     @PostMapping("/login")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
-        log.info("员工登录：{}", employeeLoginDTO);
 
         Employee employee = employeeService.login(employeeLoginDTO);
 
@@ -81,7 +80,6 @@ public class EmployeeController {
      */
     @GetMapping("/page")
     public Result<PageResult<Employee>> page(EmployeePageQueryDTO employeePageQueryDTO) {
-        log.info("员工信息分页查询：{}", employeePageQueryDTO);
         PageResult<Employee> pageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
     }
