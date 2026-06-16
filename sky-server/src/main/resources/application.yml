@@ -52,7 +52,7 @@ otel:
     name: food-delivery-system-core
   exporter:
     otlp:
-      endpoint: http://localhost:4318
+      endpoint: http://host.containers.internal:4318
       protocol: http/protobuf
   traces:
     exporter: otlp
