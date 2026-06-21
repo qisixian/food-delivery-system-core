@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 
 @SpringBootTest
-public class PageTests {
+class PageTests {
 
     @Autowired
     EmployeeMapper employeeMapper;

@@ -1,6 +1,7 @@
 package com.sky.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sky.constant.LogFields;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -25,7 +26,9 @@ import java.util.Map;
  * Http工具类
  */
 @Slf4j
-public class HttpClientUtil {
+public final class HttpClientUtil {
+
+    private HttpClientUtil() {}
 
     static final  int TIMEOUT_MSEC = 5 * 1000;
 
@@ -45,8 +48,8 @@ public class HttpClientUtil {
         try{
             URIBuilder builder = new URIBuilder(url);
             if(paramMap != null){
-                for (String key : paramMap.keySet()) {
-                    builder.addParameter(key,paramMap.get(key));
+                for (Map.Entry<String, String> param : paramMap.entrySet()) {
+                    builder.addParameter(param.getKey(), param.getValue());
                 }
             }
             URI uri = builder.build();
@@ -62,15 +65,13 @@ public class HttpClientUtil {
                 result = EntityUtils.toString(response.getEntity(),"UTF-8");
             }
         }catch (Exception e){
-//            e.printStackTrace();
-            log.atWarn().addKeyValue("exception", e.getClass().getName()).setCause(e).log(e.getMessage());
+            log.atWarn().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log(e.getMessage());
         }finally {
             try {
                 response.close();
                 httpClient.close();
             } catch (IOException e) {
-//                e.printStackTrace();
-                log.atWarn().addKeyValue("exception", e.getClass().getName()).setCause(e).log(e.getMessage());
+                log.atWarn().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log(e.getMessage());
             }
         }
 
@@ -96,7 +97,7 @@ public class HttpClientUtil {
 
             // 创建参数列表
             if (paramMap != null) {
-                List<NameValuePair> paramList = new ArrayList();
+                List<NameValuePair> paramList = new ArrayList<>();
                 for (Map.Entry<String, String> param : paramMap.entrySet()) {
                     paramList.add(new BasicNameValuePair(param.getKey(), param.getValue()));
                 }
@@ -117,8 +118,7 @@ public class HttpClientUtil {
             try {
                 response.close();
             } catch (IOException e) {
-//                e.printStackTrace();
-                log.atWarn().addKeyValue("exception", e.getClass().getName()).setCause(e).log(e.getMessage());
+                log.atWarn().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log(e.getMessage());
             }
         }
 
@@ -169,7 +169,7 @@ public class HttpClientUtil {
                 response.close();
             } catch (IOException e) {
 //                e.printStackTrace();
-                log.atWarn().addKeyValue("exception", e.getClass().getName()).setCause(e).log(e.getMessage());
+                log.atWarn().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log(e.getMessage());
             }
         }
 

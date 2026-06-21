@@ -14,6 +14,8 @@ import com.sky.vo.SetmealOverViewVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -31,6 +33,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private DishMapper dishMapper;
     @Autowired
     private SetmealMapper setmealMapper;
+    @Autowired
+    private Clock clock;
 
     /**
      * 根据时间段统计营业数据
@@ -47,7 +51,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
          * 新增用户：当日新增用户的数量
          */
 
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("begin",begin);
         map.put("end",end);
 
@@ -91,8 +95,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      * @return
      */
     public OrderOverViewVO getOrderOverView() {
-        Map map = new HashMap();
-        map.put("begin", LocalDateTime.now().with(LocalTime.MIN));
+        Map<String, Object> map = new HashMap<>();
+        map.put("begin", LocalDateTime.now(clock).with(LocalTime.MIN));
         map.put("status", Orders.TO_BE_CONFIRMED);
 
         //待接单
@@ -129,7 +133,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      * @return
      */
     public DishOverViewVO getDishOverView() {
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("status", StatusConstant.ENABLE);
         Integer sold = dishMapper.countByMap(map);
 
@@ -148,7 +152,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      * @return
      */
     public SetmealOverViewVO getSetmealOverView() {
-        Map map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("status", StatusConstant.ENABLE);
         Integer sold = setmealMapper.countByMap(map);
 

@@ -8,10 +8,15 @@ import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
-public class JwtUtil {
+public final class JwtUtil {
+
+    private JwtUtil() {}
+
     /**
      * 生成jwt
      * 使用Hs256算法, 私匙使用固定秘钥
@@ -26,8 +31,7 @@ public class JwtUtil {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
         // 生成JWT的时间
-        long expMillis = System.currentTimeMillis() + ttlMillis;
-        Date exp = new Date(expMillis);
+        Instant expirationTime = Instant.now().plus(Duration.ofMillis(ttlMillis));
 
         // 设置jwt的body
         JwtBuilder builder = Jwts.builder()
@@ -36,7 +40,7 @@ public class JwtUtil {
                 // 设置签名使用的签名算法和签名使用的秘钥
                 .signWith(signatureAlgorithm, secretKey.getBytes(StandardCharsets.UTF_8))
                 // 设置过期时间
-                .setExpiration(exp);
+                .expiration(Date.from(expirationTime));
 
         return builder.compact();
     }

@@ -19,11 +19,6 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    /**
-     * 查询分类
-     * @param type
-     * @return
-     */
     @GetMapping("/list")
     @Schema(description = "查询分类")
     public Result<List<Category>> list(@RequestParam(required = false) Integer type) {

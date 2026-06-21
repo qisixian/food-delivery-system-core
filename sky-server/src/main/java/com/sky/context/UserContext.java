@@ -1,5 +1,6 @@
 package com.sky.context;
 
+import com.sky.constant.LogFields;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -12,24 +13,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class UserContext {
 
-    public final ThreadLocal<Long> USER_ID = new ThreadLocal<>();
+    private final ThreadLocal<Long> userId = new ThreadLocal<>();
 
     public void set(Long id) {
-        USER_ID.set(id);
+        userId.set(id);
         log.atDebug()
-                .addKeyValue("userId", id)
+                .addKeyValue(LogFields.USER_ID, id)
                 .log("set userId");
     }
 
     public Long get() {
-        return USER_ID.get();
+        return userId.get();
     }
 
     public void remove() {
         log.atDebug()
-                .addKeyValue("userId", USER_ID.get())
+                .addKeyValue(LogFields.USER_ID, userId.get())
                 .log("clear userId");
-        USER_ID.remove();
+        userId.remove();
     }
 
 }

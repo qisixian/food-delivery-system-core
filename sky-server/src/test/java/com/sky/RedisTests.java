@@ -7,29 +7,23 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 
 @SpringBootTest
-public class RedisTests {
+class RedisTests {
 
     @Autowired
     private RedisTemplate redisTemplate;
 
     @Disabled("Only run manually")
     @Test
-    public void testRedisConnection() {
+    void testRedisConnection() {
         redisTemplate.opsForValue().set("testKey", "testValue");
         String value = (String) redisTemplate.opsForValue().get("testKey");
         System.out.println("value = " + value);
         assert "testValue".equals(value);
     }
 
-//    @Test
-//    public void testFailure() {
-//        assert "testValue".equals("wrongValue");
-//    }
-
-
     @Disabled("Only run manually")
     @Test
-    public void testChineseValue() {
+    void testChineseValue() {
         String value = "中文测试";
         redisTemplate.opsForValue().set("testKey", value);
         String redisValue = (String) redisTemplate.opsForValue().get("testKey");

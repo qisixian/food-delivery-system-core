@@ -1,7 +1,5 @@
 package com.sky;
 
-import com.sky.dto.UserLoginDTO;
-import com.sky.entity.User;
 import com.sky.properties.GoogleLoginProperties;
 import com.sky.utils.HttpClientUtil;
 import org.junit.jupiter.api.Disabled;
@@ -13,16 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootTest
-public class OauthTests {
+class OauthTests {
 
     @Autowired
     private GoogleLoginProperties googleLoginProperties;
 
     @Disabled("Only run manually")
     @Test
-    public void googleOauthTest() {
-
-//        System.out.println(googleLoginProperties);
+    void googleOauthTest() {
 
         // 调用 google 登录接口，获得用户openId
         Map<String, String> map = new HashMap<>();

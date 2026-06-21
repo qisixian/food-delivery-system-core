@@ -97,6 +97,7 @@ knife4j:
     language: zh_cn
 
 sky:
+  employee-default-password: ${EMPLOYEE_DEFAULT_PASSWORD:}
   jwt:
     # 设置jwt签名加密时使用的秘钥
 #    admin-secret-key: itcast
@@ -107,11 +108,6 @@ sky:
     admin-token-name: token
     user-secret-key: GQmANafNXXEPv5Dq2pwqqnIi0Z1lQbP+2WTQkd3CLhM=
     user-ttl: 7200000
-  alioss:
-    endpoint: ${sky.alioss.endpoint}
-    access-key-id: ${sky.alioss.access-key-id}
-    access-key-secret: ${sky.alioss.access-key-secret}
-    bucket-name: ${sky.alioss.bucket-name}
   oauth2:
     google:
       auth-url: https://accounts.google.com/o/oauth2/v2/auth

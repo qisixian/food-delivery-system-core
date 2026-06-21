@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.*;
 public class ShopController {
 
     @Autowired
-    RedisTemplate redisTemplate;
+    RedisTemplate<String, Object> redisTemplate;
 
     @GetMapping("/status")
     @Schema(description = "获取店铺营业状态")
-    public Result getStatus() {
+    public Result<Integer> getStatus() {
         Integer status = (Integer) redisTemplate.opsForValue().get("shop_status");
         return Result.success(status);
     }

@@ -32,13 +32,6 @@ public class EmployeeController {
     @Autowired
     private JwtProperties jwtProperties;
 
-    /**
-     * 登录
-     *
-     * @param employeeLoginDTO
-     * @return
-     */
-    // TODO: 为什么这个接口不会被拦截呢？
     @PostMapping("/login")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
 
@@ -62,22 +55,11 @@ public class EmployeeController {
         return Result.success(employeeLoginVO);
     }
 
-    /**
-     * 退出
-     *
-     * @return
-     */
     @PostMapping("/logout")
     public Result<String> logout() {
         return Result.success();
     }
 
-    /**
-     * 员工信息分页查询
-     *
-     * @param employeePageQueryDTO
-     * @return
-     */
     @GetMapping("/page")
     public Result<PageResult<Employee>> page(EmployeePageQueryDTO employeePageQueryDTO) {
         PageResult<Employee> pageResult = employeeService.pageQuery(employeePageQueryDTO);
@@ -85,7 +67,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Result save(@RequestBody EmployeeDTO employeeDTO) {
+    public Result<Void> save(@RequestBody EmployeeDTO employeeDTO) {
         employeeService.save(employeeDTO);
         return Result.success();
     }

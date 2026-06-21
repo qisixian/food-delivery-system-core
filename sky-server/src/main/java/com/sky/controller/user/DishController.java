@@ -1,7 +1,5 @@
 package com.sky.controller.user;
 
-import com.sky.constant.StatusConstant;
-import com.sky.entity.Dish;
 import com.sky.result.Result;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -21,12 +19,6 @@ public class DishController {
     @Autowired
     private DishService dishService;
 
-    /**
-     * 根据分类id查询菜品
-     *
-     * @param categoryId
-     * @return
-     */
     @GetMapping("/list")
     @Schema(description = "根据分类id查询菜品")
     public Result<List<DishVO>> list(Long categoryId) {

@@ -3,7 +3,6 @@ package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
-import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.UserContext;
 import com.sky.dto.EmployeeDTO;
@@ -19,8 +18,9 @@ import com.sky.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 @Slf4j
 @Service
@@ -31,6 +31,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private UserContext userContext;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Value("${sky.employee-default-password}")
+    private String employeeDefaultPassword;
 
     /**
      * 员工登录
@@ -52,15 +58,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         //密码比对
-        //对前端传来的明文密码进行MD5加密
-        password = DigestUtils.md5DigestAsHex(password.getBytes());
-//        log.trace("password: {}", password);
-        if (!password.equals(employee.getPassword())) {
+        //对前端传来的明文密码进行BCrypt加密，再对比
+        if (!passwordEncoder.matches(password, employee.getPassword())) {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
-        if (employee.getStatus() == StatusConstant.DISABLE) {
+        if (employee.getStatus().equals(StatusConstant.DISABLE)) {
             //账号被锁定
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
@@ -85,8 +89,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeDTO, employee);
         employee.setStatus(StatusConstant.ENABLE);
-        //设置初始密码123456，需要进行MD5加密
-        String password = DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes());
+        //设置初始密码，需要进行BCrypt加密
+        String password = passwordEncoder.encode(employeeDefaultPassword);
         employee.setPassword(password);
         employeeMapper.insert(employee);
     }

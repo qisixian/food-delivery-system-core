@@ -30,6 +30,12 @@
         <jjwt>0.12.7</jjwt>
         <jakarta.xml.bind-api>4.0.2</jakarta.xml.bind-api>
         <poi>5.4.1</poi>
+        <sonar.projectKey>food-delivery-system</sonar.projectKey>
+        <sonar.projectName>Food Delivery System</sonar.projectName>
+        <sonar.host.url>http://localhost:9002</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -80,12 +86,6 @@
                 <artifactId>aspectjweaver</artifactId>
                 <version>${aspectj}</version>
             </dependency>
-
-<!--            <dependency>-->
-<!--                <groupId>io.jsonwebtoken</groupId>-->
-<!--                <artifactId>jjwt</artifactId>-->
-<!--                <version>${jjwt}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
@@ -103,13 +103,6 @@
                 <version>${jjwt}</version>
                 <scope>runtime</scope>
             </dependency>
-
-<!--            <dependency>-->
-<!--                <groupId>com.aliyun.oss</groupId>-->
-<!--                <artifactId>aliyun-sdk-oss</artifactId>-->
-<!--                <version>${aliyun.sdk.oss}</version>-->
-<!--            </dependency>-->
-
             <dependency>
                 <groupId>javax.xml.bind</groupId>
                 <artifactId>jaxb-api</artifactId>
@@ -138,12 +131,6 @@
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi}</version>
             </dependency>
-            <!--微信支付-->
-<!--            <dependency>-->
-<!--                <groupId>com.github.wechatpay-apiv3</groupId>-->
-<!--                <artifactId>wechatpay-apache-httpclient</artifactId>-->
-<!--                <version>0.4.8</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
@@ -156,4 +143,35 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.15</version>
+                <executions>
+                    <!-- 在测试开始前注入 agent -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- verify 阶段生成报告 -->
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>5.7.0.6970</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>

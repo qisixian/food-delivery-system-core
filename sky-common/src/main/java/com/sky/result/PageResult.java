@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,8 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageResult<T> implements Serializable {
-
+public class PageResult<T> {
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private long total; //总记录数

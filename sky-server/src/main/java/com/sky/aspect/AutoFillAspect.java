@@ -2,6 +2,7 @@ package com.sky.aspect;
 
 import com.sky.annotation.AutoFill;
 import com.sky.constant.AutoFillConstant;
+import com.sky.constant.LogFields;
 import com.sky.context.UserContext;
 import com.sky.enumeration.OperationType;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Aspect
@@ -22,6 +24,9 @@ public class AutoFillAspect {
 
     @Autowired
     private UserContext userContext;
+
+    @Autowired
+    private Clock clock;
 
     @Pointcut("execution(* com.sky.mapper.*.*(..))")
     public void autoFillPointcut() {}
@@ -40,36 +45,37 @@ public class AutoFillAspect {
         Long currentUserId = userContext.get();
         if(operationType == OperationType.INSERT) {
             try {
+                LocalDateTime now = LocalDateTime.now(clock);
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_TIME, LocalDateTime.class)
-                        .invoke(entity, LocalDateTime.now());
+                        .invoke(entity, now);
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_USER, Long.class)
                         .invoke(entity, currentUserId);
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class)
-                        .invoke(entity, LocalDateTime.now());
+                        .invoke(entity, now);
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class)
                         .invoke(entity, currentUserId);
             }
             catch (NoSuchMethodException e) {
-                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Method setCreateTime not found in class: {}", entity.getClass().getName());
+                log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log("Method setCreateTime not found in class: {}", entity.getClass().getName());
             } catch (IllegalAccessException e) {
-                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Illegal access when invoking setCreateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log("Illegal access when invoking setCreateTime on class: {}", entity.getClass().getName());
             } catch (InvocationTargetException e) {
-                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Invocation target exception when invoking setCreateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log("Invocation target exception when invoking setCreateTime on class: {}", entity.getClass().getName());
             }
         }
         if (operationType == OperationType.UPDATE) {
             try {
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class)
-                        .invoke(entity, LocalDateTime.now());
+                        .invoke(entity, LocalDateTime.now(clock));
                 entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_USER, Long.class)
                         .invoke(entity, currentUserId);
             }
             catch (NoSuchMethodException e) {
-                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Method setUpdateTime not found in class: {}", entity.getClass().getName());
+                log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log("Method setUpdateTime not found in class: {}", entity.getClass().getName());
             } catch (IllegalAccessException e) {
-                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Illegal access when invoking setUpdateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log("Illegal access when invoking setUpdateTime on class: {}", entity.getClass().getName());
             } catch (InvocationTargetException e) {
-                log.atError().addKeyValue("exception", e.getClass().getName()).setCause(e).log("Invocation target exception when invoking setUpdateTime on class: {}", entity.getClass().getName());
+                log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log("Invocation target exception when invoking setUpdateTime on class: {}", entity.getClass().getName());
             }
         }
     }

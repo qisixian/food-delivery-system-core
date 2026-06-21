@@ -3,7 +3,9 @@ package com.sky.constant;
 /**
  * 公共字段自动填充相关常量
  */
-public class AutoFillConstant {
+public final class AutoFillConstant {
+
+    private AutoFillConstant() {}
     /**
      * 实体类中的方法名称
      */

@@ -34,10 +34,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private SetmealMapper setmealMapper;
 
-    /**
-     * 新增分类
-     * @param categoryDTO
-     */
     public void save(CategoryDTO categoryDTO) {
         Category category = new Category();
         //属性拷贝
@@ -49,11 +45,6 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.insert(category);
     }
 
-    /**
-     * 分页查询
-     * @param categoryPageQueryDTO
-     * @return
-     */
     public PageResult<Category> pageQuery(CategoryPageQueryDTO categoryPageQueryDTO) {
         PageHelper.startPage(categoryPageQueryDTO.getPage(),categoryPageQueryDTO.getPageSize());
         //下一条sql进行分页，自动加入limit关键字分页
@@ -61,10 +52,6 @@ public class CategoryServiceImpl implements CategoryService {
         return new PageResult<>(page.getTotal(), page.getResult());
     }
 
-    /**
-     * 根据id删除分类
-     * @param id
-     */
     public void deleteById(Long id) {
         //查询当前分类是否关联了菜品，如果关联了就抛出业务异常
         Integer count = dishMapper.countByCategoryId(id);
@@ -84,21 +71,12 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.deleteById(id);
     }
 
-    /**
-     * 修改分类
-     * @param categoryDTO
-     */
     public void update(CategoryDTO categoryDTO) {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO,category);
         categoryMapper.update(category);
     }
 
-    /**
-     * 启用、禁用分类
-     * @param status
-     * @param id
-     */
     public void startOrStop(Integer status, Long id) {
         Category category = Category.builder()
                 .id(id)
@@ -107,11 +85,6 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.update(category);
     }
 
-    /**
-     * 根据类型查询分类
-     * @param type
-     * @return
-     */
     public List<Category> list(Integer type) {
         return categoryMapper.list(type);
     }

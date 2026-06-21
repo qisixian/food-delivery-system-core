@@ -1,12 +1,10 @@
 package com.sky.controller.admin;
 
-import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.SetmealService;
-import com.sky.vo.DishVO;
 import com.sky.vo.SetmealVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +35,13 @@ public class SetmealController {
     }
 
     @PostMapping
-    public Result save(@RequestBody SetmealDTO setmealDTO){
+    public Result<Void> save(@RequestBody SetmealDTO setmealDTO){
         setmealService.save(setmealDTO);
         return Result.success();
     }
 
     @PutMapping
-    public Result update(@RequestBody SetmealDTO setmealDTO){
+    public Result<Void> update(@RequestBody SetmealDTO setmealDTO){
         setmealService.updateWithDish(setmealDTO);
         return Result.success();
     }
@@ -58,7 +56,7 @@ public class SetmealController {
 
 
     @DeleteMapping
-    public Result delete(@RequestParam List<Long> ids){
+    public Result<Void> delete(@RequestParam List<Long> ids){
         setmealService.deleteBatch(ids);
         return Result.success();
     }

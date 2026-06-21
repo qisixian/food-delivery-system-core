@@ -1,6 +1,6 @@
 ## Food Delivery System Core
 
-#### compose
+### compose
 ```bash
 podman compose up -d
 docker compose down 
@@ -10,6 +10,8 @@ docker compose down
 ```bash
 
 #### app
+
+./mvnw clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
 
 ./mvnw clean package
 podman build -t food-delivery-system-core:1.0 .
@@ -23,6 +25,7 @@ podman run -d \
     food-delivery-system-core:1.0
 
 podman logs -f food-delivery-system-core
+podman rmi food-delivery-system-core
 podman pull ghcr.io/qisixian/food-delivery-system-core:latest
 
 
@@ -32,7 +35,6 @@ podman pull otel/opentelemetry-collector:0.154.0
 
 podman run -d \
     --name otel-collector \
-    --network observability \
     -p 4317:4317 \
     -p 4318:4318 \
     -v ./ops/otel-collector-config.yaml:/etc/otelcol/config.yaml \
@@ -112,5 +114,21 @@ podman machine ssh
 podman exec -it otel-collector sh
 
 
+#### SonarQube
+
+podman run -d \
+  --name sonarqube \
+  -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
+  -p 9002:9000 \
+  sonarqube:community
+
+podman stop sonarqube
+podman rm sonarqube
+
 ```
 
+### SonarQube
+No CI sonar yet, because Github Action cannot reach local SonarQube server.
+
+#### SonarQube Disabled Rules
+java:S6813 - Field dependency injection should be avoided

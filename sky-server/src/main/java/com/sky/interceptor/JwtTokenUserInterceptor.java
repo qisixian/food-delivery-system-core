@@ -1,6 +1,7 @@
 package com.sky.interceptor;
 
 import com.sky.constant.JwtClaimsConstant;
+import com.sky.constant.LogFields;
 import com.sky.constant.MessageConstant;
 import com.sky.context.UserContext;
 import com.sky.exception.UserNotLoginException;
@@ -45,6 +46,7 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
      * @return
      * @throws Exception
      */
+    @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         //判断当前拦截到的是Controller的方法还是其他资源
         if (!(handler instanceof HandlerMethod)) {
@@ -64,7 +66,7 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
 //            log.debug("当前顾客id：{}", userId);
             userContext.set(userId);
-            MDC.put("userId", Objects.toString(userId));
+            MDC.put(LogFields.USER_ID, Objects.toString(userId));
             MDC.put("isEmployee", "false");
             //3、通过，放行
             return true;
@@ -72,10 +74,8 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             // 放行可选登录的接口
             if(optionalAuth) return true;
 
-            //4、不通过。这里能抛出异常给全局异常处理器处理吗？还是响应401状态码？
+            //4、不通过。这里能抛出异常给全局异常处理器处理吗？还是响应401状态码 return false？
             throw new UserNotLoginException(MessageConstant.USER_NOT_LOGIN);
-//            response.setStatus(401);
-//            return false;
         }
     }
 

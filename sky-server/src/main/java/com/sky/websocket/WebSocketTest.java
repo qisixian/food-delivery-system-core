@@ -22,7 +22,7 @@ public class WebSocketTest {
 //        webSocketServer.sendToAllClient("这是来自服务端的测试消息：" + DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now()));
 
         // 通过WebSocket服务器给管理员端发送来单通知
-        Map map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("type", 1); // 1表示来单通知 2表示客户催单
         map.put("orderId", 1234567890L);
         map.put("content", "订单号：" + 1234567890L);

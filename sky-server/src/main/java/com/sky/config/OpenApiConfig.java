@@ -22,21 +22,21 @@ public class OpenApiConfig {
         return openApi -> {
             if (openApi.getPaths() == null) return;
 
-            openApi.getPaths().forEach((path, pathItem) -> {
+            openApi.getPaths().forEach((path, pathItem) ->
                 pathItem.readOperationsMap().forEach((method, operation) -> {
                     if (operation.getOperationId() != null
                             && operation.getTags() != null
                             && !operation.getTags().isEmpty()) {
                         // override the operationId
                         String oldId = operation.getOperationId();
-                        String tag = operation.getTags().get(0);
+                        String tag = operation.getTags().getFirst();
                         String userPrefix = path.startsWith("/user") ? "user_" : "";
                         String normalizedTag = tag.replaceAll("-controller$", "");
                         normalizedTag = kebabToLowerCamelCase(normalizedTag);
                         operation.setOperationId(userPrefix + normalizedTag + "_" + oldId);
                     }
-                });
-            });
+                })
+            );
         };
     }
 

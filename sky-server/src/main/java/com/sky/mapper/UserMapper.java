@@ -22,5 +22,5 @@ public interface UserMapper {
     @Select("select * from user where id = #{userId}")
     User getById(Long userId);
 
-    Integer countByMap(Map map);
+    Integer countByMap(Map<String, Object> map);
 }

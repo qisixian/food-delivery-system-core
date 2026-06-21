@@ -5,8 +5,6 @@ import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import com.sky.vo.OrderStatisticsVO;
-import com.sky.vo.OrderVO;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -39,9 +37,9 @@ public interface OrderMapper {
      */
     void update(Orders orders);
 
-    Double sumByMap(Map map);
+    Double sumByMap(Map<String, Object> map);
 
-    Integer countByMap(Map map);
+    Integer countByMap(Map<String, Object> map);
 
     List<GoodsSalesDTO> getSalesTop10(LocalDateTime begin, LocalDateTime end);
 

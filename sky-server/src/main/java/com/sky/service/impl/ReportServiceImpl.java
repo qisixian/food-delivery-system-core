@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.sky.constant.LogFields;
 import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
@@ -9,6 +10,7 @@ import com.sky.service.WorkspaceService;
 import com.sky.vo.*;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -17,10 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 public class ReportServiceImpl implements ReportService {
 
@@ -33,6 +37,9 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private WorkspaceService workspaceService;
 
+    @Autowired
+    private Clock clock;
+
     public TurnoverReportVO getTurnoverStatistics(LocalDate begin, LocalDate end) {
         List<LocalDate> dateList = new ArrayList<>();
         dateList.add(begin);
@@ -44,7 +51,7 @@ public class ReportServiceImpl implements ReportService {
         for (LocalDate date : dateList) {
             LocalDateTime beginTime = date.atStartOfDay();
             LocalDateTime endTime = date.plusDays(1).atStartOfDay();
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("beginTime", beginTime);
             map.put("endTime", endTime);
             map.put("status", Orders.COMPLETED);
@@ -72,7 +79,7 @@ public class ReportServiceImpl implements ReportService {
         for (LocalDate date : dateList) {
             LocalDateTime beginTime = date.atStartOfDay();
             LocalDateTime endTime = date.plusDays(1).atStartOfDay();
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("endTime", endTime);
             // 总用户数
             Integer totalUser = userMapper.countByMap(map);
@@ -108,7 +115,7 @@ public class ReportServiceImpl implements ReportService {
         for(LocalDate date : dateList) {
             LocalDateTime beginTime = date.atStartOfDay();
             LocalDateTime endTime = date.plusDays(1).atStartOfDay();
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("beginTime", beginTime);
             map.put("endTime", endTime);
             // 总订单数
@@ -153,8 +160,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     public void exportBusinessData(HttpServletResponse response) {
-        LocalDateTime dateBegin = LocalDate.now().minusDays(30).atStartOfDay();
-        LocalDateTime dateEnd = LocalDate.now().atStartOfDay();
+        LocalDateTime dateBegin = LocalDate.now(clock).minusDays(30).atStartOfDay();
+        LocalDateTime dateEnd = LocalDate.now(clock).atStartOfDay();
         BusinessDataVO businessDataVO = workspaceService.getBusinessData(dateBegin, dateEnd);
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
         try {
@@ -192,7 +199,7 @@ public class ReportServiceImpl implements ReportService {
             out.close();
             excel.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.atWarn().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log(e.getMessage());
         }
     }
 }

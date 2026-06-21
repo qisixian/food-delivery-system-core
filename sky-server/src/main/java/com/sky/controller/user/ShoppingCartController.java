@@ -23,13 +23,13 @@ public class ShoppingCartController {
     private UserContext userContext;
 
     @PostMapping("/add")
-    public Result add(@RequestBody ShoppingCartDTO shoppingCartDTO) {
+    public Result<Void> add(@RequestBody ShoppingCartDTO shoppingCartDTO) {
         shoppingCartService.addShoppingCart(shoppingCartDTO);
         return Result.success();
     }
 
     @PostMapping("/sub")
-    public Result sub(@RequestBody ShoppingCartDTO shoppingCartDTO) {
+    public Result<Void> sub(@RequestBody ShoppingCartDTO shoppingCartDTO) {
         shoppingCartService.removeShoppingCart(shoppingCartDTO);
         return Result.success();
     }
@@ -45,7 +45,7 @@ public class ShoppingCartController {
     }
 
     @DeleteMapping("/clean")
-    public Result clean() {
+    public Result<Void> clean() {
         shoppingCartService.cleanShoppingCart();
         return Result.success();
     }

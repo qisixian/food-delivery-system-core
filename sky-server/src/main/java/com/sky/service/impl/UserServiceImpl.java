@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
@@ -10,6 +11,7 @@ import com.sky.utils.HttpClientUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private GoogleLoginProperties googleLoginProperties;
 
+    @Autowired
+    private Clock clock;
+
     @Override
     public User googleLogin(UserLoginDTO userLoginDTO) {
         // 调用 google 登录接口，获得用户openId
@@ -30,7 +35,7 @@ public class UserServiceImpl implements UserService {
         map.put("client_id", googleLoginProperties.getClientId());
         map.put("client_secret", googleLoginProperties.getClientSecret());
         String json = HttpClientUtil.doGet(googleLoginProperties.getAuthUrl(), map);
-        JSONObject jsonObject = JSONObject.parseObject(json);
+        JSONObject jsonObject = JSON.parseObject(json);
         String openid = jsonObject.getString("openid");
         // 到这里会不会有什么异常？
 
@@ -41,7 +46,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             user = User.builder()
                     .openid(openid)
-                    .createTime(LocalDateTime.now())
+                    .createTime(LocalDateTime.now(clock))
                     .build();
             userMapper.insert(user);
         }
@@ -58,7 +63,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             user = User.builder()
                     .openid(openid)
-                    .createTime(LocalDateTime.now())
+                    .createTime(LocalDateTime.now(clock))
                     .build();
             userMapper.insert(user);
         }

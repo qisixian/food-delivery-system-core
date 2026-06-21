@@ -1,6 +1,5 @@
 package com.sky.controller.admin;
 
-import com.sky.context.UserContext;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
@@ -42,13 +41,13 @@ public class DishController {
     }
 
     @PostMapping
-    public Result save(@RequestBody DishDTO dishDTO){
+    public Result<Void> save(@RequestBody DishDTO dishDTO){
         dishService.saveWithFlavor(dishDTO);
         return Result.success();
     }
 
     @PutMapping
-    public Result update(@RequestBody DishDTO dishDTO) {
+    public Result<Void> update(@RequestBody DishDTO dishDTO) {
         dishService.updateWithFlavor(dishDTO);
         return Result.success();
     }
@@ -62,7 +61,7 @@ public class DishController {
     }
 
     @DeleteMapping
-    public Result delete(@RequestParam List<Long> ids){
+    public Result<Void> delete(@RequestParam List<Long> ids){
         dishService.deleteBatch(ids);
         return Result.success();
     }

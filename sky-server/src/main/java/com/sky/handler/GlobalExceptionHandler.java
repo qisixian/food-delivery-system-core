@@ -1,5 +1,6 @@
 package com.sky.handler;
 
+import com.sky.constant.LogFields;
 import com.sky.constant.MessageConstant;
 import com.sky.exception.BaseException;
 import com.sky.exception.UserNotLoginException;
@@ -23,20 +24,20 @@ public class GlobalExceptionHandler {
      * @return
      */
     @ExceptionHandler
-    public Result exceptionHandler(BaseException ex){
-        log.atError().addKeyValue("exception", ex.getClass().getName()).setCause(ex).log(ex.getMessage());
+    public Result<Void> exceptionHandler(BaseException ex){
+        log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).setCause(ex).log(ex.getMessage());
         return Result.error(ex.getMessage());
     }
 
     @ExceptionHandler
-    public Result exceptionHandler(UserNotLoginException ex){
-        log.atInfo().addKeyValue("exception", ex.getClass().getName()).log("exception: " + ex.getMessage());
+    public Result<Void> exceptionHandler(UserNotLoginException ex){
+        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log("exception: " + ex.getMessage());
         return Result.error(ex.getMessage());
     }
 
     @ExceptionHandler
-    public Result exceptionHandler(SQLIntegrityConstraintViolationException ex){
-        log.atError().addKeyValue("exception", ex.getClass().getName()).setCause(ex).log(ex.getMessage());
+    public Result<Void> exceptionHandler(SQLIntegrityConstraintViolationException ex){
+        log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).setCause(ex).log(ex.getMessage());
         return Result.error(MessageConstant.ALREADY_EXISTS);
     }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson2.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.LogFields;
 import com.sky.constant.MessageConstant;
 import com.sky.context.UserContext;
 import com.sky.dto.*;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +54,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserContext userContext;
 
+    @Autowired
+    private Clock clock;
+
 //    @Autowired
 //    private WeChatPayUtil weChatPayUtil;
 
@@ -78,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
         // 插入订单表
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
-        orders.setOrderTime(LocalDateTime.now());
+        orders.setOrderTime(LocalDateTime.now(clock));
         orders.setPayStatus(Orders.UN_PAID);
         orders.setStatus(Orders.PENDING_PAYMENT);
         orders.setNumber(String.valueOf(System.currentTimeMillis()));
@@ -102,7 +107,7 @@ public class OrderServiceImpl implements OrderService {
         shoppingCartMapper.deleteByUserId(userId);
 
         log.atInfo()
-            .addKeyValue("orderId", orders.getId())
+            .addKeyValue(LogFields.ORDER_ID, orders.getId())
             .log("Submit order success");
 
         // 返回结果
@@ -161,17 +166,17 @@ public class OrderServiceImpl implements OrderService {
                 .id(ordersDB.getId())
                 .payStatus(Orders.PAID)
                 .status(Orders.TO_BE_CONFIRMED)
-                .checkoutTime(LocalDateTime.now())
+                .checkoutTime(LocalDateTime.now(clock))
                 .build();
 
         orderMapper.update(orders);
 
         log.atInfo()
-            .addKeyValue("orderId", ordersDB.getId())
+            .addKeyValue(LogFields.ORDER_ID, ordersDB.getId())
             .log("Payment success");
 
         // 通过WebSocket服务器给管理员端发送来单通知
-        Map map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("type", 1); // 1表示来单通知 2表示客户催单
         map.put("orderId", ordersDB.getId());
         map.put("content", "订单号：" + outTradeNo);
@@ -187,7 +192,7 @@ public class OrderServiceImpl implements OrderService {
 //        if (ordersDB == null) {
 //            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
 //        }
-        Map map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("type", 2); // 1表示来单通知 2表示客户催单
         map.put("orderId", id);
 //        map.put("content", "订单号：" + ordersDB.getNumber());

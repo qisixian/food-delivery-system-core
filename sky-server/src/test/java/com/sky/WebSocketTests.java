@@ -13,7 +13,7 @@ import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = "app.websocket.enabled=true")
-public class WebSocketTests {
+class WebSocketTests {
 
     @Autowired
     WebSocketServer webSocketServer;
@@ -21,7 +21,7 @@ public class WebSocketTests {
     // 不对，不能这么测试，这个webSocketServer 和 主程序中的 不是同一个实例
     @Disabled("Only run manually")
     @Test
-    public void webSocketTest() {
+    void webSocketTest() {
         System.out.println("WebSocket test executed");
         Map map = new HashMap<>();
         map.put("type", 1); // 1表示来单通知 2表示客户催单

@@ -1,5 +1,6 @@
 package com.sky.websocket;
 
+import com.sky.constant.LogFields;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import jakarta.websocket.OnClose;
@@ -21,7 +22,8 @@ import java.util.Map;
 public class WebSocketServer {
 
     //存放会话对象
-    private static Map<String, Session> sessionMap = new HashMap();
+    // todo: 这里需要使用 ConcurrentHashMap 吗？
+    private static final Map<String, Session> sessionMap = new HashMap<>();
 
     /**
      * 连接建立成功调用的方法
@@ -66,7 +68,7 @@ public class WebSocketServer {
                 //服务器向客户端发送消息
                 session.getBasicRemote().sendText(message);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.atWarn().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, e.getClass().getName()).setCause(e).log(e.getMessage());
             }
         }
     }

@@ -2,6 +2,7 @@ package com.sky.controller.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sky.constant.JwtClaimsConstant;
+import com.sky.constant.LogFields;
 import com.sky.dto.GoogleTokenResponseDTO;
 import com.sky.entity.User;
 import com.sky.properties.GoogleLoginProperties;
@@ -99,7 +100,7 @@ public class GoogleAuthController {
         // 看是否要创建用户
         User user = userService.gerOrCreateUser(googleOpenId);
 
-        log.atInfo().addKeyValue("userId", user.getId()).log("Google login success");
+        log.atInfo().addKeyValue(LogFields.USER_ID, user.getId()).log("Google login success");
 
         // 换成自己系统的用户id，生成JWT
         Map<String, Object> claims = new HashMap<>();

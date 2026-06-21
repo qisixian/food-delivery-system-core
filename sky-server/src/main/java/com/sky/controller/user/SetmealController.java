@@ -20,12 +20,6 @@ public class SetmealController {
     @Autowired
     private SetmealService setmealService;
 
-    /**
-     * 条件查询
-     *
-     * @param categoryId
-     * @return
-     */
     @GetMapping("/list")
     @Schema(description = "根据分类id查询套餐")
     public Result<List<Setmeal>> list(Long categoryId) {
@@ -37,12 +31,6 @@ public class SetmealController {
         return Result.success(list);
     }
 
-    /**
-     * 根据套餐id查询包含的菜品列表
-     *
-     * @param id
-     * @return
-     */
     @GetMapping("/dish/{id}")
     @Schema(description = "根据套餐id查询包含的菜品列表")
     public Result<List<DishItemVO>> dishList(@PathVariable("id") Long id) {

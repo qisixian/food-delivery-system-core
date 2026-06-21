@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sky.properties.WeChatProperties;
 import com.sky.service.OrderService;
-//import com.wechat.pay.contrib.apache.httpclient.util.AesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,22 +33,17 @@ public class PayNotifyController {
      *
      * @param request
      */
-    @RequestMapping("/paySuccess")
+    @PostMapping("/paySuccess")
     public void paySuccessNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
         //读取数据
         String body = readData(request);
-//        log.info("支付成功回调：{}", body);
 
         //数据解密
         String plainText = decryptData(body);
-//        log.info("解密后的文本：{}", plainText);
 
         JSONObject jsonObject = JSON.parseObject(plainText);
         String outTradeNo = jsonObject.getString("out_trade_no");//商户平台订单号
         String transactionId = jsonObject.getString("transaction_id");//微信支付交易号
-
-//        log.info("商户平台订单号：{}", outTradeNo);
-//        log.info("微信支付交易号：{}", transactionId);
 
         //业务处理，修改订单状态、来单提醒
         orderService.paySuccess(outTradeNo);
@@ -69,7 +64,7 @@ public class PayNotifyController {
         StringBuilder result = new StringBuilder();
         String line = null;
         while ((line = reader.readLine()) != null) {
-            if (result.length() > 0) {
+            if (!result.isEmpty()) {
                 result.append("\n");
             }
             result.append(line);

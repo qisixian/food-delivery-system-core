@@ -5,10 +5,8 @@ import com.sky.context.UserContext;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.exception.OrderBusinessException;
-import com.sky.exception.UserNotLoginException;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
-import com.sky.vo.DishVO;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
@@ -57,7 +55,7 @@ public class OrderController {
 
     @GetMapping("/reminder/{id}")
     @Schema(description = "客户催单")
-    public Result reminder(@PathVariable Long id) {
+    public Result<Void> reminder(@PathVariable Long id) {
         orderService.reminder(id);
         return Result.success();
     }
