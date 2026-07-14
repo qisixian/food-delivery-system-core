@@ -9,7 +9,7 @@ import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
-import com.sky.exception.DeletionNotAllowedException;
+import com.sky.exception.InvalidBusinessOperationException;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
@@ -99,7 +99,7 @@ public class SetmealServiceImpl implements SetmealService {
             List<Integer> dishStatus = dishMapper.getStatusBySetmealId(id);
             for (Integer s : dishStatus) {
                 if (s.equals(StatusConstant.DISABLE)) {
-                    throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                    throw new InvalidBusinessOperationException(MessageConstant.SETMEAL_CONTAINS_DISABLED_DISH);
                 }
             }
         }
@@ -116,7 +116,7 @@ public class SetmealServiceImpl implements SetmealService {
         for (Long id : ids) {
             Setmeal setmeal = setmealMapper.getById(id);
             if (setmeal.getStatus().equals(StatusConstant.ENABLE)) {
-                throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
+                throw new InvalidBusinessOperationException(MessageConstant.SETMEAL_ON_SALE);
             }
             categoryIds.add(setmeal.getCategoryId());
         }

@@ -10,6 +10,8 @@ public interface EmployeeService {
 
     Employee login(EmployeeLoginDTO employeeLoginDTO);
 
+    String createToken(Employee employee);
+
     PageResult<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
 
     void save(EmployeeDTO employeeDTO);

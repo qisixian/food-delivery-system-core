@@ -2,12 +2,12 @@ package com.sky.handler;
 
 import com.sky.constant.LogFields;
 import com.sky.constant.MessageConstant;
-import com.sky.exception.BaseException;
-import com.sky.exception.UserNotLoginException;
+import com.sky.exception.*;
 import com.sky.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -16,22 +16,29 @@ import java.sql.SQLIntegrityConstraintViolationException;
  */
 @RestControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    /**
-     * 捕获业务异常
-     * @param ex
-     * @return
-     */
     @ExceptionHandler
-    public Result<Void> exceptionHandler(BaseException ex){
-        log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).setCause(ex).log(ex.getMessage());
+    public Result<Void> exceptionHandler(FeatureNotEnabledException ex){
+        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
         return Result.error(ex.getMessage());
     }
 
     @ExceptionHandler
-    public Result<Void> exceptionHandler(UserNotLoginException ex){
-        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log("exception: " + ex.getMessage());
+    public Result<Void> exceptionHandler(BusinessException ex){
+        log.atWarn().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
+        return Result.error(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public Result<Void> exceptionHandler(InvalidBusinessOperationException ex){
+        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
+        return Result.error(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public Result<Void> exceptionHandler(ApplicationAuthenticationException ex){
+        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
         return Result.error(ex.getMessage());
     }
 
@@ -39,6 +46,20 @@ public class GlobalExceptionHandler {
     public Result<Void> exceptionHandler(SQLIntegrityConstraintViolationException ex){
         log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).setCause(ex).log(ex.getMessage());
         return Result.error(MessageConstant.ALREADY_EXISTS);
+    }
+
+    @ExceptionHandler
+    public Result<Void> exceptionHandler(BaseException ex){
+        log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).setCause(ex).log(ex.getMessage());
+        return Result.error(ex.getMessage());
+    }
+
+    // Spring MVC 框架异常，目前通过 ResponseEntityExceptionHandler 自动处理
+
+    @ExceptionHandler
+    public Result<Void> handleUnexpectedException(Exception ex) {
+        log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).setCause(ex).log("Unexpected system exception");
+        return Result.error(MessageConstant.UNEXPECTED_SYSTEM_ERROR);
     }
 
 }

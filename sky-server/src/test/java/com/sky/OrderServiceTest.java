@@ -12,8 +12,7 @@ import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
-import com.sky.exception.AddressBookBusinessException;
-import com.sky.exception.ShoppingCartBusinessException;
+import com.sky.exception.BusinessException;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
@@ -33,8 +32,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +55,7 @@ class OrderServiceTest {
     private static final Long USER_ID = 10L;
     private static final Long ADDRESS_BOOK_ID = 20L;
     private static final Long ORDER_ID = 30L;
-    private static final LocalDateTime ORDER_TIME = LocalDateTime.of(2026, 7, 5, 12, 30, 0);
+    private static final LocalDateTime ORDER_TIME = LocalDateTime.of(2026, Month.JULY, 5, 12, 30, 0);
 
     @Mock
     private OrderMapper orderMapper;
@@ -112,7 +111,6 @@ class OrderServiceTest {
 
         ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
         verify(orderMapper).insert(orderCaptor.capture());
-        // 只 verify(orderMapper).insert(orderCaptor.capture())，不测下面的数据可以吗？
         Orders insertedOrder = orderCaptor.getValue();
         assertEquals(ORDER_ID, orderCaptor.getValue().getId());
         assertEquals(Orders.PENDING_PAYMENT, insertedOrder.getStatus());
@@ -137,12 +135,12 @@ class OrderServiceTest {
         OrdersSubmitDTO request = buildSubmitDTO();
         when(addressBookMapper.getById(ADDRESS_BOOK_ID)).thenReturn(null);
 
-        AddressBookBusinessException exception = assertThrows(
-                AddressBookBusinessException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> orderService.submitOrder(request)
         );
 
-        assertEquals(MessageConstant.ADDRESS_BOOK_IS_NULL, exception.getMessage());
+        assertEquals(MessageConstant.ORDER_DELIVERY_ADDRESS_REQUIRED, exception.getMessage());
         verify(addressBookMapper).getById(ADDRESS_BOOK_ID);
         verifyNoInteractions(userContext, shoppingCartMapper, orderMapper, orderDetailMapper);
     }
@@ -154,12 +152,12 @@ class OrderServiceTest {
         when(userContext.get()).thenReturn(USER_ID);
         when(shoppingCartMapper.list(any(ShoppingCart.class))).thenReturn(null);
 
-        ShoppingCartBusinessException exception = assertThrows(
-                ShoppingCartBusinessException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> orderService.submitOrder(request)
         );
 
-        assertEquals(MessageConstant.SHOPPING_CART_IS_NULL, exception.getMessage());
+        assertEquals(MessageConstant.ORDER_SHOPPING_CART_REQUIRED, exception.getMessage());
         verify(orderMapper, never()).insert(any(Orders.class));
         verify(orderDetailMapper, never()).insertBatch(any());
         verify(shoppingCartMapper, never()).deleteByUserId(any());
@@ -172,12 +170,12 @@ class OrderServiceTest {
         when(userContext.get()).thenReturn(USER_ID);
         when(shoppingCartMapper.list(any(ShoppingCart.class))).thenReturn(Collections.emptyList());
 
-        ShoppingCartBusinessException exception = assertThrows(
-                ShoppingCartBusinessException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> orderService.submitOrder(request)
         );
 
-        assertEquals(MessageConstant.SHOPPING_CART_IS_NULL, exception.getMessage());
+        assertEquals(MessageConstant.ORDER_SHOPPING_CART_REQUIRED, exception.getMessage());
         verify(orderMapper, never()).insert(any(Orders.class));
         verify(orderDetailMapper, never()).insertBatch(any());
         verify(shoppingCartMapper, never()).deleteByUserId(any());

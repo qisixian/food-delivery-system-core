@@ -9,7 +9,7 @@ import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
-import com.sky.exception.DeletionNotAllowedException;
+import com.sky.exception.InvalidBusinessOperationException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
@@ -77,12 +77,12 @@ public class DishServiceImpl implements DishService {
         for (Long id : ids) {
             Dish dish = dishMapper.getById(id);
             if (dish.getStatus().equals(StatusConstant.ENABLE)) {
-                throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+                throw new InvalidBusinessOperationException(MessageConstant.DISH_ON_SALE);
             }
         }
         List<Long> linkedDishIds = setmealDishMapper.getSetmealIdsByDishIds(ids);
         if (linkedDishIds != null && !linkedDishIds.isEmpty()) {
-            throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+            throw new InvalidBusinessOperationException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
         // Best Pracitce: 一个接口保证功能前提下sql次数尽可能的少
         dishMapper.deleteByIds(ids);

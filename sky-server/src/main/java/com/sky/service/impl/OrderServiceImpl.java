@@ -9,9 +9,7 @@ import com.sky.constant.MessageConstant;
 import com.sky.context.UserContext;
 import com.sky.dto.*;
 import com.sky.entity.*;
-import com.sky.exception.AddressBookBusinessException;
-import com.sky.exception.OrderBusinessException;
-import com.sky.exception.ShoppingCartBusinessException;
+import com.sky.exception.BusinessException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
@@ -24,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -69,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
         // 处理各种业务异常
         AddressBook addressBook = addressBookMapper.getById(ordersSubmitDTO.getAddressBookId());
         if (addressBook == null) {
-            throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
+            throw new BusinessException(MessageConstant.ORDER_DELIVERY_ADDRESS_REQUIRED);
         }
         Long userId = userContext.get();
         ShoppingCart shoppingCart = ShoppingCart.builder()
@@ -77,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
         if (shoppingCartList == null || shoppingCartList.isEmpty()) {
-            throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+            throw new BusinessException(MessageConstant.ORDER_SHOPPING_CART_REQUIRED);
         }
 
         // 插入订单表
@@ -142,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
         JSONObject jsonObject = new JSONObject();
 
         if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
-            throw new OrderBusinessException("该订单已支付");
+            throw new BusinessException(MessageConstant.ORDER_ALREADY_PAID);
         }
 
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);

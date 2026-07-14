@@ -4,7 +4,7 @@ import com.sky.constant.JwtClaimsConstant;
 import com.sky.constant.LogFields;
 import com.sky.constant.MessageConstant;
 import com.sky.context.UserContext;
-import com.sky.exception.UserNotLoginException;
+import com.sky.exception.UnauthenticatedException;
 import com.sky.properties.JwtProperties;
 import com.sky.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -75,7 +75,7 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             if(optionalAuth) return true;
 
             //4、不通过。这里能抛出异常给全局异常处理器处理吗？还是响应401状态码 return false？
-            throw new UserNotLoginException(MessageConstant.USER_NOT_LOGIN);
+            throw new UnauthenticatedException(MessageConstant.UNAUTHENTICATED);
         }
     }
 
