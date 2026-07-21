@@ -3,7 +3,7 @@
 ### compose
 ```bash
 podman compose up -d
-docker compose down 
+podman compose down 
 ```
 
 ### command
@@ -22,7 +22,7 @@ podman run -d \
     --name food-delivery-system-core \
     -p 8080:8080 \
     --env-file .env \
-    food-delivery-system-core:1.0
+    food-delivery-system-core:latest
 
 podman logs -f food-delivery-system-core
 podman rmi food-delivery-system-core

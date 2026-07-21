@@ -21,6 +21,7 @@ class OauthTests {
     void googleOauthTest() {
 
         // 调用 google 登录接口，获得用户openId
+        // 这里应该是重定向到 googleLoginProperties.getAuthUrl()，不是直接调用
         Map<String, String> map = new HashMap<>();
         map.put("client_id", googleLoginProperties.getClientId());
         map.put("client_secret", googleLoginProperties.getClientSecret());
