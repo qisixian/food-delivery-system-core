@@ -11,7 +11,13 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.HashMap;
 import java.util.Map;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "sky.oauth2.google.client-id=test-client-id",
+        "sky.oauth2.google.client-secret=test-client-secret"
+    }
+)
 @TestPropertySource(properties = "app.websocket.enabled=true")
 class WebSocketTests {
 

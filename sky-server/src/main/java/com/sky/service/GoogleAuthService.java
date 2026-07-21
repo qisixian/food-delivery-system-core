@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
@@ -99,6 +100,12 @@ public class GoogleAuthService {
                 )
                 .bodyToMono(GoogleTokenResponseDTO.class)
                 .timeout(Duration.ofSeconds(5))
+                .retryWhen(Retry.backoff(2, Duration.ofMillis(200))
+                        .filter(throwable ->
+                                throwable instanceof ThirdPartyServiceException exception
+                                        && exception.getErrorType() == ThirdPartyErrorType.SERVICE_UNAVAILABLE
+                        )
+                        .onRetryExhaustedThrow((spec, signal) -> signal.failure()))
                 .onErrorMap(TimeoutException.class, ex -> new ThirdPartyServiceException(
                         "Google OAuth token request timed out",
                         ThirdPartyProvider.GOOGLE, ThirdPartyErrorType.TIMEOUT
@@ -143,6 +150,12 @@ public class GoogleAuthService {
                 )
                 .bodyToMono(JsonNode.class)
                 .timeout(Duration.ofSeconds(5))
+                .retryWhen(Retry.backoff(2, Duration.ofMillis(200))
+                        .filter(throwable ->
+                                throwable instanceof ThirdPartyServiceException exception
+                                        && exception.getErrorType() == ThirdPartyErrorType.SERVICE_UNAVAILABLE
+                        )
+                        .onRetryExhaustedThrow((spec, signal) -> signal.failure()))
                 .onErrorMap(TimeoutException.class, ex -> new ThirdPartyServiceException(
                         "Google userinfo request timed out",
                         ThirdPartyProvider.GOOGLE, ThirdPartyErrorType.TIMEOUT

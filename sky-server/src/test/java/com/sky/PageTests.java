@@ -11,7 +11,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+    "sky.oauth2.google.client-id=test-client-id",
+    "sky.oauth2.google.client-secret=test-client-secret"
+})
 class PageTests {
 
     @Autowired

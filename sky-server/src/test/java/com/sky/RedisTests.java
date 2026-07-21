@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "sky.oauth2.google.client-id=test-client-id",
+        "sky.oauth2.google.client-secret=test-client-secret"
+})
 class RedisTests {
 
     @Autowired

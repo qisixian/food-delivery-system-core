@@ -10,7 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@SpringBootTest
+@SpringBootTest(properties = {
+    "sky.oauth2.google.client-id=test-client-id",
+    "sky.oauth2.google.client-secret=test-client-secret"
+})
 class PasswordEncoderTests {
 
     @Autowired
