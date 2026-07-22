@@ -31,6 +31,9 @@ public class GoogleAuthService {
     UserService userService;
 
     @Autowired
+    WebClient webClient;
+
+    @Autowired
     private GoogleLoginProperties googleLoginProperties;
 
     public String buildAuthorizationUrl(){
@@ -50,7 +53,7 @@ public class GoogleAuthService {
     public GoogleLoginResultDTO loginWithAuthorizationCode(String code) {
         GoogleTokenResponseDTO googleTokenResponseDTO = exchangeCodeForToken(code);
 
-        String googleOpenId = getUserInfoFromToken(googleTokenResponseDTO);
+        String googleOpenId = getOpenIdFromToken(googleTokenResponseDTO);
 
         User user = userService.getOrCreateUser(googleOpenId);
 
@@ -68,7 +71,7 @@ public class GoogleAuthService {
     public GoogleTokenResponseDTO exchangeCodeForToken(String code){
         // HTTP调用外部系统怎么做异常处理，这里接口的异常是怎么定义的
         // WebClientResponseException$BadRequest: 400 Bad Request from POST https://oauth2.googleapis.com/token
-        GoogleTokenResponseDTO tokenResponse = WebClient.create()
+        GoogleTokenResponseDTO tokenResponse = webClient
                 .post()
                 .uri(googleLoginProperties.getTokenUrl())
                 .body(BodyInserters.fromFormData("code", code)
@@ -118,13 +121,13 @@ public class GoogleAuthService {
         return tokenResponse;
     }
 
-    public String getUserInfoFromToken(GoogleTokenResponseDTO googleTokenResponseDTO){
+    public String getOpenIdFromToken(GoogleTokenResponseDTO googleTokenResponseDTO){
         // 使用 access token 获取用户信息
         // 但是其实 JWT解析 id_token 就能拿到用户信息了，不需要再发请求了
         // 更推荐直接不用这个请求
-        JsonNode userInfo = WebClient.create()
+        JsonNode userInfo = webClient
                 .get()
-                .uri("https://www.googleapis.com/oauth2/v2/userinfo")
+                .uri(googleLoginProperties.getUserInfoUrl())
                 .headers(headers -> headers.setBearerAuth(googleTokenResponseDTO.getAccessToken()))
                 .retrieve()
                 .onStatus(
@@ -165,8 +168,7 @@ public class GoogleAuthService {
             throw new ThirdPartyServiceException("Google userinfo response does not contain user openid",
                     ThirdPartyProvider.GOOGLE, ThirdPartyErrorType.INVALID_RESPONSE);
         }
-        String googleOpenId = userInfo.get("id").asText();
-        return googleOpenId;
+        return userInfo.get("id").asText();
     }
 
 }

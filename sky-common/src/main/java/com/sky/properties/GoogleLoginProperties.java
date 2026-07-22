@@ -39,4 +39,8 @@ public class GoogleLoginProperties {
     @NotBlank
     @URL
     private String frontendCallbackUrl;
+
+    @NotBlank
+    @URL
+    private String userInfoUrl;
 }

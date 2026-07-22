@@ -117,3 +117,4 @@ sky:
       token-url: https://oauth2.googleapis.com/token
       scope: openid
       frontend-callback-url: http://localhost:5173/oauth/callback
+      user-info-url: https://www.googleapis.com/oauth2/v2/userinfo

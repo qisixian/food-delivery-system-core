@@ -1,15 +1,10 @@
 package com.sky.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.sky.constant.JwtClaimsConstant;
-import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
 import com.sky.mapper.UserMapper;
-import com.sky.properties.GoogleLoginProperties;
 import com.sky.properties.JwtProperties;
 import com.sky.service.UserService;
-import com.sky.utils.HttpClientUtil;
 import com.sky.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
