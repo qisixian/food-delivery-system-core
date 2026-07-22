@@ -28,6 +28,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -401,7 +403,8 @@ class GoogleAuthServiceTest {
         assertEquals(AUTH_CODE, form.getFirst("code"));
         assertEquals(googleLoginProperties.getClientId(), form.getFirst("client_id"));
         assertEquals(googleLoginProperties.getClientSecret(), form.getFirst("client_secret"));
-        assertEquals(googleLoginProperties.getRedirectUri(), form.getFirst("redirect_uri"));
+        String redirectUri = URLDecoder.decode(form.getFirst("redirect_uri"), StandardCharsets.UTF_8);
+        assertEquals(googleLoginProperties.getRedirectUri(), redirectUri);
         assertEquals("authorization_code", form.getFirst("grant_type"));
     }
 
