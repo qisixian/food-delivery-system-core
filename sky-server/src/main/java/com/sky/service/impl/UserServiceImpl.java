@@ -21,11 +21,12 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Autowired
-    JwtProperties jwtProperties;
+    private JwtProperties jwtProperties;
 
     @Autowired
     private Clock clock;
 
+    @Override
     public User getOrCreateUser(String openid) {
         // 判断当前用户是否为新用户
         User user = userMapper.getByOpenid(openid);

@@ -2,6 +2,7 @@ package com.sky.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -20,7 +21,7 @@ public class JwtProperties {
      */
     @NotBlank
     private String adminSecretKey;
-    @NotNull
+    @Positive
     private long adminTtl;
     private String adminTokenName;
 
@@ -29,7 +30,7 @@ public class JwtProperties {
      */
     @NotBlank
     private String userSecretKey;
-    @NotNull
+    @Positive
     private long userTtl;
     private String userTokenName;
 

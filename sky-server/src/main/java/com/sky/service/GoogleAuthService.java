@@ -28,10 +28,10 @@ import java.util.concurrent.TimeoutException;
 public class GoogleAuthService {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    WebClient webClient;
+    private WebClient webClient;
 
     @Autowired
     private GoogleLoginProperties googleLoginProperties;
