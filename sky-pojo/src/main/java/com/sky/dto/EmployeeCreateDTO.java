@@ -1,22 +1,26 @@
 package com.sky.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
-public class EmployeeDTO implements Serializable {
+public class EmployeeCreateDTO implements Serializable {
 
-    private Long id;
-
+    @NotBlank
     private String username;
 
+    @NotBlank
     private String name;
 
+    @NotBlank
     private String phone;
 
+    @NotBlank
     private String sex;
 
+    @NotBlank
     private String idNumber;
 
 }

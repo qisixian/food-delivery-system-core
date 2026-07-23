@@ -27,5 +27,7 @@ public final class MessageConstant {
     public static final String ORDER_STATUS_ERROR = "ORDER_STATUS_ERROR"; // "订单状态错误"
     public static final String ORDER_NOT_FOUND = "ORDER_NOT_FOUND"; // "订单不存在"
     public static final String ORDER_ALREADY_PAID = "ORDER_ALREADY_PAID"; // "订单已支付"
+    public static final String EMPLOYEE_NOT_FOUND = "EMPLOYEE_NOT_FOUND"; // "员工不存在"
+    public static final String DISH_NOT_FOUND = "DISH_NOT_FOUND"; // "菜品不存在"
 
 }

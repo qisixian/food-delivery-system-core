@@ -10,6 +10,7 @@ import com.sky.context.UserContext;
 import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.exception.BusinessException;
+import com.sky.exception.ResourceNotFoundException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
@@ -24,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -216,6 +214,9 @@ public class OrderServiceImpl implements OrderService {
     public OrderVO getByOrderNumber(String orderNumber) {
         // 根据订单号查询订单
         Orders ordersDB = orderMapper.getByNumber(orderNumber);
+        if (ordersDB == null) {
+            throw new ResourceNotFoundException(MessageConstant.ORDER_NOT_FOUND);
+        }
         OrderVO orderVO = new OrderVO();
         BeanUtils.copyProperties(ordersDB, orderVO);
         List<OrderDetail> details = orderDetailMapper.listByOrderId(ordersDB.getId());

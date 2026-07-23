@@ -1,23 +1,19 @@
 package com.sky.controller.admin;
 
-import com.sky.constant.JwtClaimsConstant;
-import com.sky.dto.EmployeeDTO;
+import com.sky.dto.EmployeeCreateDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.EmployeeUpdateDTO;
 import com.sky.entity.Employee;
-import com.sky.properties.JwtProperties;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
-import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 员工管理
@@ -31,7 +27,7 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @PostMapping("/login")
-    public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
+    public Result<EmployeeLoginVO> login(@RequestBody @Valid EmployeeLoginDTO employeeLoginDTO) {
 
         Employee employee = employeeService.login(employeeLoginDTO);
 
@@ -60,8 +56,8 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Result<Void> save(@RequestBody EmployeeDTO employeeDTO) {
-        employeeService.save(employeeDTO);
+    public Result<Void> save(@RequestBody @Valid EmployeeCreateDTO employeeCreateDTO) {
+        employeeService.save(employeeCreateDTO);
         return Result.success();
     }
 
@@ -79,8 +75,8 @@ public class EmployeeController {
     }
 
     @PutMapping
-    public Result<String> update(@RequestBody EmployeeDTO employeeDTO){
-        employeeService.update(employeeDTO);
+    public Result<String> update(@RequestBody @Valid EmployeeUpdateDTO employeeUpdateDTO){
+        employeeService.update(employeeUpdateDTO);
         return Result.success();
     }
 

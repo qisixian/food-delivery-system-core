@@ -108,6 +108,7 @@ sky:
     admin-token-name: token
     user-secret-key: GQmANafNXXEPv5Dq2pwqqnIi0Z1lQbP+2WTQkd3CLhM=
     user-ttl: 7200000
+    user-token-name: token
   oauth2:
     google:
       auth-url: https://accounts.google.com/o/oauth2/v2/auth

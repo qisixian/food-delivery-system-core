@@ -5,6 +5,7 @@ import com.sky.constant.MessageConstant;
 import com.sky.exception.*;
 import com.sky.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -20,6 +21,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
     public Result<Void> exceptionHandler(FeatureNotEnabledException ex){
+        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
+        return Result.error(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public Result<Void> exceptionHandler(InputValidationException ex){
+        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
+        return Result.error(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public Result<Void> exceptionHandler(ResourceNotFoundException ex){
         log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
         return Result.error(ex.getMessage());
     }
@@ -43,8 +56,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler
-    public Result<Void> exceptionHandler(SQLIntegrityConstraintViolationException ex){
-        log.atError().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).setCause(ex).log(ex.getMessage());
+    public Result<Void> exceptionHandler(DuplicateKeyException ex){
+        log.atInfo().addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName()).log(ex.getMessage());
         return Result.error(MessageConstant.ALREADY_EXISTS);
     }
 

@@ -31,5 +31,5 @@ public interface EmployeeMapper {
     void insert(Employee employee);
 
     @AutoFill(OperationType.UPDATE)
-    void update(Employee employee);
+    int update(Employee employee);
 }

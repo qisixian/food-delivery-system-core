@@ -23,6 +23,7 @@ public class JwtProperties {
     private String adminSecretKey;
     @Positive
     private long adminTtl;
+    @NotBlank
     private String adminTokenName;
 
     /**
@@ -32,6 +33,7 @@ public class JwtProperties {
     private String userSecretKey;
     @Positive
     private long userTtl;
+    @NotBlank
     private String userTokenName;
 
 }

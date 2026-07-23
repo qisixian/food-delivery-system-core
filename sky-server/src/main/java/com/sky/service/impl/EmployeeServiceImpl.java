@@ -6,12 +6,12 @@ import com.sky.constant.JwtClaimsConstant;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.UserContext;
-import com.sky.dto.EmployeeDTO;
+import com.sky.dto.EmployeeCreateDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.EmployeeUpdateDTO;
 import com.sky.entity.Employee;
-import com.sky.exception.AccountLockedException;
-import com.sky.exception.AuthenticationFailedException;
+import com.sky.exception.*;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.properties.JwtProperties;
 import com.sky.result.PageResult;
@@ -56,28 +56,21 @@ public class EmployeeServiceImpl implements EmployeeService {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
 
-        //1、根据用户名查询数据库中的数据
         Employee employee = employeeMapper.getByUsername(username);
 
-        //2、处理各种异常情况（用户名不存在、密码不对、账号被锁定）
         if (employee == null) {
-            //账号不存在
             throw new AuthenticationFailedException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
 
-        //密码比对
         //对前端传来的明文密码进行BCrypt加密，再对比
         if (!passwordEncoder.matches(password, employee.getPassword())) {
-            //密码错误
             throw new AuthenticationFailedException(MessageConstant.PASSWORD_ERROR);
         }
 
         if (employee.getStatus().equals(StatusConstant.DISABLE)) {
-            //账号被锁定
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
 
-        //3、返回实体对象
         return employee;
     }
 
@@ -103,9 +96,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new PageResult<>(page.getTotal(), page.getResult());
     }
 
-    public void save(EmployeeDTO employeeDTO) {
+    public void save(EmployeeCreateDTO employeeCreateDTO) {
         Employee employee = new Employee();
-        BeanUtils.copyProperties(employeeDTO, employee);
+        BeanUtils.copyProperties(employeeCreateDTO, employee);
         employee.setStatus(StatusConstant.ENABLE);
         //设置初始密码，需要进行BCrypt加密
         String password = passwordEncoder.encode(employeeDefaultPassword);
@@ -119,22 +112,34 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param id
      */
     public void changeStatus(Integer status, Long id) {
+        if (!status.equals(StatusConstant.ENABLE) && !status.equals(StatusConstant.DISABLE)) {
+            throw new InputValidationException("Invalid status value");
+        }
         Employee employee = Employee.builder()
                 .id(id)
                 .status(status)
                 .build();
-        employeeMapper.update(employee);
+        int rows = employeeMapper.update(employee);
+        if (rows == 0) {
+            throw new ResourceNotFoundException(MessageConstant.EMPLOYEE_NOT_FOUND);
+        }
     }
 
     public Employee getById(Long id){
         Employee employee = employeeMapper.getById(id);
+        if (employee == null) {
+            throw new ResourceNotFoundException(MessageConstant.EMPLOYEE_NOT_FOUND);
+        }
         employee.setPassword("****");
         return employee;
     }
 
-    public void update(EmployeeDTO employeeDTO){
+    public void update(EmployeeUpdateDTO employeeUpdateDTO){
         Employee employee = new Employee();
-        BeanUtils.copyProperties(employeeDTO, employee);
-        employeeMapper.update(employee);
+        BeanUtils.copyProperties(employeeUpdateDTO, employee);
+        int rows = employeeMapper.update(employee);
+        if (rows == 0) {
+            throw new ResourceNotFoundException(MessageConstant.EMPLOYEE_NOT_FOUND);
+        }
     }
 }
