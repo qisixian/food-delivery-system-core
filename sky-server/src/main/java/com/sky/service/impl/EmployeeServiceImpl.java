@@ -5,7 +5,6 @@ import com.github.pagehelper.PageHelper;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
-import com.sky.context.UserContext;
 import com.sky.dto.EmployeeCreateDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
@@ -35,9 +34,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeMapper employeeMapper;
 
     @Autowired
-    private UserContext userContext;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -46,31 +42,20 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Value("${sky.employee-default-password}")
     private String employeeDefaultPassword;
 
-    /**
-     * 员工登录
-     *
-     * @param employeeLoginDTO
-     * @return
-     */
     public Employee login(EmployeeLoginDTO employeeLoginDTO) {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
-
         Employee employee = employeeMapper.getByUsername(username);
-
         if (employee == null) {
             throw new AuthenticationFailedException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
-
         //对前端传来的明文密码进行BCrypt加密，再对比
         if (!passwordEncoder.matches(password, employee.getPassword())) {
             throw new AuthenticationFailedException(MessageConstant.PASSWORD_ERROR);
         }
-
         if (employee.getStatus().equals(StatusConstant.DISABLE)) {
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
-
         return employee;
     }
 
@@ -84,12 +69,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                 claims);
     }
 
-    /**
-     * 员工分页查询
-     *
-     * @param employeePageQueryDTO
-     * @return
-     */
     public PageResult<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
         Page<Employee> page = employeeMapper.pageQuery();

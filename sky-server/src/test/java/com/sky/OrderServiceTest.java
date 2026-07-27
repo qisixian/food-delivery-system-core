@@ -13,6 +13,7 @@ import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.BusinessException;
+import com.sky.exception.ResourceNotFoundException;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
@@ -265,6 +266,21 @@ class OrderServiceTest {
         assertEquals(orderNumber, result.getNumber());
         assertEquals(details, result.getOrderDetailList());
         assertEquals("宫保鸡丁, 米饭", result.getOrderDishes());
+    }
+
+    @Test
+    void getByOrderNumber_whenOrderDoesNotExist_thenThrowResourceNotFoundException() {
+        String orderNumber = "ORD404";
+        when(orderMapper.getByNumber(orderNumber)).thenReturn(null);
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> orderService.getByOrderNumber(orderNumber)
+        );
+
+        assertEquals(MessageConstant.ORDER_NOT_FOUND, exception.getMessage());
+        verify(orderMapper).getByNumber(orderNumber);
+        verify(orderDetailMapper, never()).listByOrderId(any());
     }
 
     @Test
