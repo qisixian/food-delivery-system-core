@@ -98,6 +98,8 @@ knife4j:
 
 sky:
   employee-default-password: ${EMPLOYEE_DEFAULT_PASSWORD:}
+  cookie:
+    secure: false
   jwt:
     # 设置jwt签名加密时使用的秘钥
 #    admin-secret-key: itcast

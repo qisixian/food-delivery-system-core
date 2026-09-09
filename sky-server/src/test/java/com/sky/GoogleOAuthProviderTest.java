@@ -1,14 +1,11 @@
 package com.sky;
 
-import com.sky.dto.GoogleLoginResultDTO;
 import com.sky.dto.GoogleTokenResponseDTO;
-import com.sky.entity.User;
 import com.sky.enumeration.ThirdPartyErrorType;
 import com.sky.enumeration.ThirdPartyProvider;
 import com.sky.exception.ThirdPartyServiceException;
 import com.sky.properties.GoogleLoginProperties;
-import com.sky.service.GoogleAuthService;
-import com.sky.service.UserService;
+import com.sky.oauth.GoogleOAuthProvider;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -16,9 +13,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -36,12 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class GoogleAuthServiceTest {
+class GoogleOAuthProviderTest {
 
     private static final String AUTH_CODE = "auth-code";
     private static final String ACCESS_TOKEN = "access-token";
@@ -49,10 +39,7 @@ class GoogleAuthServiceTest {
 
     private MockWebServer mockWebServer;
     private GoogleLoginProperties googleLoginProperties;
-    private GoogleAuthService googleAuthService;
-
-    @Mock
-    private UserService userService;
+    private GoogleOAuthProvider googleOAuthProvider;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -69,10 +56,9 @@ class GoogleAuthServiceTest {
         googleLoginProperties.setScope("openid email profile");
         googleLoginProperties.setFrontendCallbackUrl("http://localhost/frontend/callback");
 
-        googleAuthService = new GoogleAuthService();
-        ReflectionTestUtils.setField(googleAuthService, "userService", userService);
-        ReflectionTestUtils.setField(googleAuthService, "webClient", WebClient.builder().build());
-        ReflectionTestUtils.setField(googleAuthService, "googleLoginProperties", googleLoginProperties);
+        googleOAuthProvider = new GoogleOAuthProvider();
+        ReflectionTestUtils.setField(googleOAuthProvider, "webClient", WebClient.builder().build());
+        ReflectionTestUtils.setField(googleOAuthProvider, "googleLoginProperties", googleLoginProperties);
     }
 
     @AfterEach
@@ -86,7 +72,7 @@ class GoogleAuthServiceTest {
         @Test
         void buildAuthorizationUrl_whenPropertiesAreConfigured_thenReturnsGoogleAuthorizationUrl() {
             UriComponents uri = UriComponentsBuilder
-                    .fromUriString(googleAuthService.buildAuthorizationUrl())
+                    .fromUriString(googleOAuthProvider.buildAuthorizationUrl("test-state"))
                     .build();
 
             assertEquals("https", uri.getScheme());
@@ -98,6 +84,9 @@ class GoogleAuthServiceTest {
             assertEquals("client-id", params.getFirst("client_id"));
             assertEquals("http://localhost/callback", params.getFirst("redirect_uri"));
             assertEquals("code", params.getFirst("response_type"));
+            assertEquals("openid email profile", params.getFirst("scope"));
+            assertEquals("offline", params.getFirst("access_type"));
+            assertEquals("consent", params.getFirst("prompt"));
         }
     }
 
@@ -108,7 +97,7 @@ class GoogleAuthServiceTest {
         void exchangeCodeForToken_whenGoogleReturnsAccessToken_thenReturnsTokenResponse() throws InterruptedException {
             mockWebServer.enqueue(jsonResponse(200, tokenJson(ACCESS_TOKEN)));
 
-            GoogleTokenResponseDTO result = googleAuthService.exchangeCodeForToken(AUTH_CODE);
+            GoogleTokenResponseDTO result = googleOAuthProvider.exchangeCodeForToken(AUTH_CODE);
 
             assertEquals(ACCESS_TOKEN, result.getAccessToken());
             assertTokenRequest(takeRequest());
@@ -120,7 +109,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.exchangeCodeForToken(AUTH_CODE)
+                    () -> googleOAuthProvider.exchangeCodeForToken(AUTH_CODE)
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.INVALID_REQUEST);
@@ -134,7 +123,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.exchangeCodeForToken(AUTH_CODE)
+                    () -> googleOAuthProvider.exchangeCodeForToken(AUTH_CODE)
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.SERVICE_UNAVAILABLE);
@@ -147,7 +136,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.exchangeCodeForToken(AUTH_CODE)
+                    () -> googleOAuthProvider.exchangeCodeForToken(AUTH_CODE)
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.SERVICE_UNAVAILABLE);
@@ -160,7 +149,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.exchangeCodeForToken(AUTH_CODE)
+                    () -> googleOAuthProvider.exchangeCodeForToken(AUTH_CODE)
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.TIMEOUT);
@@ -174,7 +163,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.exchangeCodeForToken(AUTH_CODE)
+                    () -> googleOAuthProvider.exchangeCodeForToken(AUTH_CODE)
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.INVALID_RESPONSE);
@@ -187,7 +176,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.exchangeCodeForToken(AUTH_CODE)
+                    () -> googleOAuthProvider.exchangeCodeForToken(AUTH_CODE)
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.INVALID_RESPONSE);
@@ -202,7 +191,7 @@ class GoogleAuthServiceTest {
         void getOpenIdFromToken_whenGoogleReturnsUserId_thenReturnsOpenId() throws InterruptedException {
             mockWebServer.enqueue(jsonResponse(200, userInfoJson(GOOGLE_OPEN_ID)));
 
-            String result = googleAuthService.getOpenIdFromToken(tokenResponse());
+            String result = googleOAuthProvider.getOpenIdFromToken(tokenResponse());
 
             assertEquals(GOOGLE_OPEN_ID, result);
             assertUserInfoRequest(takeRequest());
@@ -214,7 +203,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.getOpenIdFromToken(tokenResponse())
+                    () -> googleOAuthProvider.getOpenIdFromToken(tokenResponse())
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.INVALID_REQUEST);
@@ -228,7 +217,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.getOpenIdFromToken(tokenResponse())
+                    () -> googleOAuthProvider.getOpenIdFromToken(tokenResponse())
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.SERVICE_UNAVAILABLE);
@@ -241,7 +230,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.getOpenIdFromToken(tokenResponse())
+                    () -> googleOAuthProvider.getOpenIdFromToken(tokenResponse())
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.SERVICE_UNAVAILABLE);
@@ -254,7 +243,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.getOpenIdFromToken(tokenResponse())
+                    () -> googleOAuthProvider.getOpenIdFromToken(tokenResponse())
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.TIMEOUT);
@@ -268,7 +257,7 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.getOpenIdFromToken(tokenResponse())
+                    () -> googleOAuthProvider.getOpenIdFromToken(tokenResponse())
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.INVALID_RESPONSE);
@@ -281,66 +270,11 @@ class GoogleAuthServiceTest {
 
             ThirdPartyServiceException exception = assertThrows(
                     ThirdPartyServiceException.class,
-                    () -> googleAuthService.getOpenIdFromToken(tokenResponse())
+                    () -> googleOAuthProvider.getOpenIdFromToken(tokenResponse())
             );
 
             assertGoogleException(exception, ThirdPartyErrorType.INVALID_RESPONSE);
             assertEquals(1, mockWebServer.getRequestCount());
-        }
-    }
-
-    @Nested
-    class LoginWithAuthorizationCodeTests {
-
-        @Test
-        void loginWithAuthorizationCode_whenGoogleFlowSucceeds_thenReturnsUserIdAndSystemToken()
-                throws InterruptedException {
-            mockWebServer.enqueue(jsonResponse(200, tokenJson(ACCESS_TOKEN)));
-            mockWebServer.enqueue(jsonResponse(200, userInfoJson(GOOGLE_OPEN_ID)));
-            User user = User.builder().id(100L).openid(GOOGLE_OPEN_ID).build();
-            when(userService.getOrCreateUser(GOOGLE_OPEN_ID)).thenReturn(user);
-            when(userService.createToken(user)).thenReturn("system-jwt");
-
-            GoogleLoginResultDTO result = googleAuthService.loginWithAuthorizationCode(AUTH_CODE);
-
-            assertEquals(100L, result.getId());
-            assertEquals("system-jwt", result.getToken());
-            verify(userService).getOrCreateUser(GOOGLE_OPEN_ID);
-            verify(userService).createToken(user);
-
-            RecordedRequest tokenRequest = takeRequest();
-            assertTokenRequest(tokenRequest);
-            RecordedRequest userInfoRequest = takeRequest();
-            assertUserInfoRequest(userInfoRequest);
-        }
-
-        @Test
-        void loginWithAuthorizationCode_whenTokenExchangeFails_thenPropagatesThirdPartyServiceException() {
-            mockWebServer.enqueue(jsonResponse(400, "{\"error\":\"invalid_grant\"}"));
-
-            ThirdPartyServiceException exception = assertThrows(
-                    ThirdPartyServiceException.class,
-                    () -> googleAuthService.loginWithAuthorizationCode(AUTH_CODE)
-            );
-
-            assertGoogleException(exception, ThirdPartyErrorType.INVALID_REQUEST);
-            verifyNoInteractions(userService);
-            assertEquals(1, mockWebServer.getRequestCount());
-        }
-
-        @Test
-        void loginWithAuthorizationCode_whenUserInfoLookupFails_thenPropagatesThirdPartyServiceException() {
-            mockWebServer.enqueue(jsonResponse(200, tokenJson(ACCESS_TOKEN)));
-            mockWebServer.enqueue(jsonResponse(401, "{\"error\":\"invalid_token\"}"));
-
-            ThirdPartyServiceException exception = assertThrows(
-                    ThirdPartyServiceException.class,
-                    () -> googleAuthService.loginWithAuthorizationCode(AUTH_CODE)
-            );
-
-            assertGoogleException(exception, ThirdPartyErrorType.INVALID_REQUEST);
-            verifyNoInteractions(userService);
-            assertEquals(2, mockWebServer.getRequestCount());
         }
     }
 
