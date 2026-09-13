@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson2.JSON;
+import com.github.f4b6a3.tsid.TsidCreator;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.LogFields;
@@ -75,13 +76,14 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(MessageConstant.ORDER_SHOPPING_CART_REQUIRED);
         }
 
+        long orderNumber = TsidCreator.getTsid().toLong();
         // 插入订单表
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
         orders.setOrderTime(LocalDateTime.now(clock));
         orders.setPayStatus(Orders.UN_PAID);
         orders.setStatus(Orders.PENDING_PAYMENT);
-        orders.setNumber(String.valueOf(System.currentTimeMillis()));
+        orders.setNumber(String.valueOf(orderNumber));
         orders.setPhone(addressBook.getPhone());
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);

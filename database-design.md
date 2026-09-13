@@ -166,32 +166,32 @@ shopping_cart表为购物车表，用于存储C端用户的购物车信息。具
 
 orders表为订单表，用于存储C端用户的订单数据。具体表结构如下：
 
-| 字段名                  | 数据类型      | 说明         | 备注                                            |
-| ----------------------- | ------------- | ------------ | ----------------------------------------------- |
-| id                      | bigint        | 主键         | 自增                                            |
-| number                  | varchar(50)   | 订单号       |                                                 |
+| 字段名                  | 数据类型      | 说明         | 备注                            |
+| ----------------------- | ------------- | ------------ |-------------------------------|
+| id                      | bigint        | 主键         | 自增                            |
+| number                  | varchar(50)   | 订单号       | not null; unique              |
 | status                  | int           | 订单状态     | 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消 |
-| user_id                 | bigint        | 用户id       | 逻辑外键                                        |
-| address_book_id         | bigint        | 地址id       | 逻辑外键                                        |
-| order_time              | datetime      | 下单时间     |                                                 |
-| checkout_time           | datetime      | 付款时间     |                                                 |
-| pay_method              | int           | 支付方式     | 1微信支付 2支付宝支付                           |
-| pay_status              | tinyint       | 支付状态     | 0未支付 1已支付 2退款                           |
-| amount                  | decimal(10,2) | 订单金额     |                                                 |
-| remark                  | varchar(100)  | 备注信息     |                                                 |
-| phone                   | varchar(11)   | 手机号       |                                                 |
-| address                 | varchar(255)  | 详细地址信息 |                                                 |
-| user_name               | varchar(32)   | 用户姓名     |                                                 |
-| consignee               | varchar(32)   | 收货人       |                                                 |
-| cancel_reason           | varchar(255)  | 订单取消原因 |                                                 |
-| rejection_reason        | varchar(255)  | 拒单原因     |                                                 |
-| cancel_time             | datetime      | 订单取消时间 |                                                 |
-| estimated_delivery_time | datetime      | 预计送达时间 |                                                 |
-| delivery_status         | tinyint       | 配送状态     | 1立即送出  0选择具体时间                        |
-| delivery_time           | datetime      | 送达时间     |                                                 |
-| pack_amount             | int           | 打包费       |                                                 |
-| tableware_number        | int           | 餐具数量     |                                                 |
-| tableware_status        | tinyint       | 餐具数量状态 | 1按餐量提供  0选择具体数量                      |
+| user_id                 | bigint        | 用户id       | 逻辑外键                          |
+| address_book_id         | bigint        | 地址id       | 逻辑外键                          |
+| order_time              | datetime      | 下单时间     |                               |
+| checkout_time           | datetime      | 付款时间     |                               |
+| pay_method              | int           | 支付方式     | 1微信支付 2支付宝支付                  |
+| pay_status              | tinyint       | 支付状态     | 0未支付 1已支付 2退款                 |
+| amount                  | decimal(10,2) | 订单金额     |                               |
+| remark                  | varchar(100)  | 备注信息     |                               |
+| phone                   | varchar(11)   | 手机号       |                               |
+| address                 | varchar(255)  | 详细地址信息 |                               |
+| user_name               | varchar(32)   | 用户姓名     |                               |
+| consignee               | varchar(32)   | 收货人       |                               |
+| cancel_reason           | varchar(255)  | 订单取消原因 |                               |
+| rejection_reason        | varchar(255)  | 拒单原因     |                               |
+| cancel_time             | datetime      | 订单取消时间 |                               |
+| estimated_delivery_time | datetime      | 预计送达时间 |                               |
+| delivery_status         | tinyint       | 配送状态     | 1立即送出  0选择具体时间                |
+| delivery_time           | datetime      | 送达时间     |                               |
+| pack_amount             | int           | 打包费       |                               |
+| tableware_number        | int           | 餐具数量     |                               |
+| tableware_status        | tinyint       | 餐具数量状态 | 1按餐量提供  0选择具体数量               |
 
 ### 11. order_detail
 

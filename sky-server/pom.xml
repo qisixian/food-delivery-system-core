@@ -163,6 +163,11 @@
             <artifactId>jjwt-jackson</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.f4b6a3</groupId>
+            <artifactId>tsid-creator</artifactId>
+            <version>5.2.6</version>
+        </dependency>
         <!-- WebClient (avoid pulling full reactive server stack) -->
         <dependency>
             <groupId>org.springframework</groupId>
