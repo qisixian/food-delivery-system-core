@@ -1,5 +1,7 @@
 package com.sky.service;
 
+import com.sky.dto.AddressBookCreateDTO;
+import com.sky.dto.AddressBookUpdateDTO;
 import com.sky.entity.AddressBook;
 import java.util.List;
 
@@ -13,8 +15,9 @@ public interface AddressBookService {
 
     void update(AddressBook addressBook);
 
-    void setDefault(AddressBook addressBook);
+    void setDefault(Long id);
 
     void deleteById(Long id);
 
+    AddressBook getDefault();
 }

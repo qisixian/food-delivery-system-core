@@ -53,7 +53,7 @@ public class OpenApiConfig {
             }
 
             Map<String, Schema> schemas = components.getSchemas();
-            String resultBaseName = chooseResultBaseSchemaName(schemas);
+            String resultBaseName = "ResultBase";
             schemas.putIfAbsent(resultBaseName, buildResultBaseSchema());
 
             List<Map.Entry<String, Schema>> entries = new ArrayList<>(schemas.entrySet());
@@ -122,21 +122,6 @@ public class OpenApiConfig {
         schema.getProperties().put("code", codeSchema);
         schema.getProperties().put("msg", new StringSchema());
         return schema;
-    }
-
-    private static String chooseResultBaseSchemaName(Map<String, Schema> schemas) {
-        if (!schemas.containsKey("Result")) {
-            return "Result";
-        }
-        if (!schemas.containsKey("ResultBase")) {
-            return "ResultBase";
-        }
-
-        int i = 2;
-        while (schemas.containsKey("ResultBase" + i)) {
-            i++;
-        }
-        return "ResultBase" + i;
     }
 
     private static String kebabToLowerCamelCase(String kebab) {

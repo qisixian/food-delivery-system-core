@@ -1,13 +1,19 @@
 package com.sky.controller.user;
 
+import com.sky.constant.MessageConstant;
 import com.sky.context.UserContext;
+import com.sky.dto.AddressBookCreateDTO;
+import com.sky.dto.AddressBookUpdateDTO;
 import com.sky.entity.AddressBook;
+import com.sky.exception.ResourceNotFoundException;
 import com.sky.result.Result;
 import com.sky.service.AddressBookService;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/user/addressBook")
@@ -52,14 +58,14 @@ public class AddressBookController {
 
     @PutMapping("/default")
     @Schema(description = "设置默认地址")
-    public Result<Void> setDefault(@RequestBody AddressBook addressBook) {
-        addressBookService.setDefault(addressBook);
+    public Result<Void> setDefault(@RequestParam Long id) {
+        addressBookService.setDefault(id);
         return Result.success();
     }
 
     @DeleteMapping
     @Schema(description = "根据id删除地址")
-    public Result<Void> deleteById(Long id) {
+    public Result<Void> deleteById(@RequestParam Long id) {
         addressBookService.deleteById(id);
         return Result.success();
     }
@@ -67,17 +73,8 @@ public class AddressBookController {
     @GetMapping("default")
     @Schema(description = "查询默认地址")
     public Result<AddressBook> getDefault() {
-        //SQL:select * from address_book where user_id = ? and is_default = 1
-        AddressBook addressBook = new AddressBook();
-        addressBook.setIsDefault(1);
-        addressBook.setUserId(userContext.get());
-        List<AddressBook> list = addressBookService.list(addressBook);
-
-        if (list != null && list.size() == 1) {
-            return Result.success(list.get(0));
-        }
-
-        return Result.error("没有查询到默认地址");
+        AddressBook addressBook = addressBookService.getDefault();
+        return Result.success(addressBook);
     }
 
 }
