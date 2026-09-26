@@ -6,7 +6,9 @@ import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import com.sky.vo.OrderStatisticsVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +38,35 @@ public interface OrderMapper {
      * @param orders
      */
     void update(Orders orders);
+
+//    @Update("update orders set status = 2 where id = #{id} and status = 1")
+//    int completePayment(Long id);
+
+    @Update("""
+        UPDATE orders
+        SET status = 2,
+            pay_status = 1,
+            checkout_time = #{checkoutTime}
+        WHERE id = #{id}
+          AND status = 1
+          AND pay_status = 0
+    """)
+    int payOrder(Long id, LocalDateTime checkoutTime);
+
+    @Update("update orders set status = 3 where id = #{id} and status = 2")
+    int acceptOrder(Long id);
+
+    @Update("update orders set status = 4 where id = #{id} and status = 3")
+    int startDelivery(Long id);
+
+    @Update("update orders set status = 5 where id = #{id} and status = 4")
+    int completeDelivery(Long id);
+
+    @Update("update orders set status = 6, rejection_reason = #{rejectReason} where id = #{id} and status = #{fromStatus} and status in (1, 2, 3, 4)")
+    int rejectOrder(@Param("id") Long id, @Param("fromStatus") Integer fromStatus, String rejectReason);
+
+    @Update("update orders set status = 6, cancel_reason = #{cancelReason} where id = #{id} and status = #{fromStatus} and status in (1, 2, 3, 4)")
+    int cancelOrder(@Param("id") Long id, @Param("fromStatus") Integer fromStatus, String cancelReason);
 
     Double sumByMap(Map<String, Object> map);
 

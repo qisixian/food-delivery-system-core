@@ -159,14 +159,12 @@ public class OrderServiceImpl implements OrderService {
         Orders ordersDB = orderMapper.getByNumber(outTradeNo);
 
         // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
-        Orders orders = Orders.builder()
-                .id(ordersDB.getId())
-                .payStatus(Orders.PAID)
-                .status(Orders.TO_BE_CONFIRMED)
-                .checkoutTime(LocalDateTime.now(clock))
-                .build();
 
-        orderMapper.update(orders);
+        int rows = orderMapper.payOrder(ordersDB.getId(), LocalDateTime.now(clock));
+        if (rows == 0) {
+            // todo: 区分重复支付处理、订单已取消等情况。真实支付接入后，“钱已支付但订单已取消”还需要记录支付事实并进入退款等后续流程
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
 
         log.atInfo()
             .addKeyValue(LogFields.ORDER_ID, ordersDB.getId())
@@ -255,43 +253,62 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
-        Orders order = new Orders();
-        order.setId(ordersConfirmDTO.getId());
-        order.setStatus(Orders.CONFIRMED);
-        orderMapper.update(order);
+    public void confirm(Long id) {
+        int rows = orderMapper.acceptOrder(id);
+        if (rows == 0) {
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
     @Override
-    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
-        Orders order = new Orders();
-        BeanUtils.copyProperties(ordersRejectionDTO, order);
-        order.setStatus(Orders.CANCELLED);
-        orderMapper.update(order);
+    public void startDelivery(Long id) {
+        int rows = orderMapper.startDelivery(id);
+        if (rows == 0) {
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
     @Override
-    public void delivery(Long id) {
-        Orders order = new Orders();
-        order.setId(id);
-        order.setStatus(Orders.DELIVERY_IN_PROGRESS);
-        orderMapper.update(order);
+    public void completeDelivery(Long id) {
+        int rows = orderMapper.completeDelivery(id);
+        if (rows == 0) {
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
     @Override
-    public void complete(Long id) {
-        Orders order = new Orders();
-        order.setId(id);
-        order.setStatus(Orders.COMPLETED);
-        orderMapper.update(order);
+    public void reject(OrdersRejectionDTO ordersRejectionDTO) {
+        Long id = ordersRejectionDTO.getId();
+        Orders orderDB = orderMapper.getById(id);
+        if (orderDB == null) {
+            throw new ResourceNotFoundException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if (!Objects.equals(orderDB.getStatus(), Orders.TO_BE_CONFIRMED) &&
+            !Objects.equals(orderDB.getStatus(), Orders.CONFIRMED)) {
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        int rows = orderMapper.rejectOrder(id, orderDB.getStatus(), ordersRejectionDTO.getRejectionReason());
+        if (rows == 0) {
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
     @Override
     public void cancel(OrdersCancelDTO ordersCancelDTO) {
-        Orders order = new Orders();
-        BeanUtils.copyProperties(ordersCancelDTO, order);
-        order.setStatus(Orders.CANCELLED);
-        orderMapper.update(order);
+        Long id = ordersCancelDTO.getId();
+        Orders orderDB = orderMapper.getById(id);
+        if (orderDB == null) {
+            throw new ResourceNotFoundException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if (!Objects.equals(orderDB.getStatus(), Orders.PENDING_PAYMENT) &&
+                !Objects.equals(orderDB.getStatus(), Orders.TO_BE_CONFIRMED) &&
+                !Objects.equals(orderDB.getStatus(), Orders.CONFIRMED)) {
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        int rows = orderMapper.cancelOrder(id, orderDB.getStatus(), ordersCancelDTO.getCancelReason());
+        if (rows == 0) {
+            throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
 

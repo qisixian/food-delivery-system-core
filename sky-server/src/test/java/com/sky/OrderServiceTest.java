@@ -4,7 +4,6 @@ import com.github.pagehelper.Page;
 import com.sky.constant.MessageConstant;
 import com.sky.context.UserContext;
 import com.sky.dto.OrdersCancelDTO;
-import com.sky.dto.OrdersConfirmDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersRejectionDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -190,19 +189,13 @@ class OrderServiceTest {
                 .number(orderNumber)
                 .build();
         when(orderMapper.getByNumber(orderNumber)).thenReturn(existingOrder);
+        when(orderMapper.payOrder(ORDER_ID, ORDER_TIME)).thenReturn(1);
         stubFixedClock();
 
         orderService.paySuccess(orderNumber);
 
         verify(orderMapper).getByNumber(orderNumber);
-
-        ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
-        verify(orderMapper).update(orderCaptor.capture());
-        Orders updatedOrder = orderCaptor.getValue();
-        assertEquals(ORDER_ID, updatedOrder.getId());
-        assertEquals(Orders.PAID, updatedOrder.getPayStatus());
-        assertEquals(Orders.TO_BE_CONFIRMED, updatedOrder.getStatus());
-        assertEquals(ORDER_TIME, updatedOrder.getCheckoutTime());
+        verify(orderMapper).payOrder(ORDER_ID, ORDER_TIME);
 
         ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
         verify(webSocketServer).sendToAllClient(messageCaptor.capture());
@@ -210,6 +203,27 @@ class OrderServiceTest {
         assertTrue(message.contains("\"type\":1"));
         assertTrue(message.contains("\"orderId\":30"));
         assertTrue(message.contains("订单号：ORD123"));
+    }
+
+    @Test
+    void paySuccess_whenNoOrderUpdated_thenThrowBusinessExceptionAndDoNotNotifyClients() {
+        String orderNumber = "ORD123";
+        Orders existingOrder = Orders.builder()
+                .id(ORDER_ID)
+                .number(orderNumber)
+                .build();
+        when(orderMapper.getByNumber(orderNumber)).thenReturn(existingOrder);
+        when(orderMapper.payOrder(ORDER_ID, ORDER_TIME)).thenReturn(0);
+        stubFixedClock();
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> orderService.paySuccess(orderNumber)
+        );
+
+        assertEquals(MessageConstant.ORDER_STATUS_ERROR, exception.getMessage());
+        verify(orderMapper).payOrder(ORDER_ID, ORDER_TIME);
+        verifyNoInteractions(webSocketServer);
     }
 
     @Test
@@ -326,55 +340,49 @@ class OrderServiceTest {
     }
 
     @Test
-    void confirm_whenOrderConfirmDtoProvided_thenUpdateOrderStatusToConfirmed() {
-        OrdersConfirmDTO dto = new OrdersConfirmDTO();
-        dto.setId(ORDER_ID);
+    void confirm_whenOrderIdProvided_thenUpdateOrderStatusToConfirmed() {
+        when(orderMapper.acceptOrder(ORDER_ID)).thenReturn(1);
 
-        orderService.confirm(dto);
+        orderService.confirm(ORDER_ID);
 
-        ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
-        verify(orderMapper).update(orderCaptor.capture());
-        Orders updatedOrder = orderCaptor.getValue();
-        assertEquals(ORDER_ID, updatedOrder.getId());
-        assertEquals(Orders.CONFIRMED, updatedOrder.getStatus());
+        verify(orderMapper).acceptOrder(ORDER_ID);
     }
 
     @Test
-    void rejection_whenRejectionDtoProvided_thenUpdateOrderStatusToCancelled() {
+    void reject_whenRejectDtoProvided_thenUpdateOrderStatusToCancelled() {
         OrdersRejectionDTO dto = new OrdersRejectionDTO();
         dto.setId(ORDER_ID);
         dto.setRejectionReason("库存不足");
 
-        orderService.rejection(dto);
+        Orders existingOrder = Orders.builder()
+                .id(ORDER_ID)
+                .status(Orders.TO_BE_CONFIRMED)
+                .build();
+        when(orderMapper.getById(ORDER_ID)).thenReturn(existingOrder);
+        when(orderMapper.rejectOrder(ORDER_ID, Orders.TO_BE_CONFIRMED, "库存不足")).thenReturn(1);
 
-        ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
-        verify(orderMapper).update(orderCaptor.capture());
-        Orders updatedOrder = orderCaptor.getValue();
-        assertEquals(ORDER_ID, updatedOrder.getId());
-        assertEquals(Orders.CANCELLED, updatedOrder.getStatus());
-        assertEquals("库存不足", updatedOrder.getRejectionReason());
+        orderService.reject(dto);
+
+        verify(orderMapper).getById(ORDER_ID);
+        verify(orderMapper).rejectOrder(ORDER_ID, Orders.TO_BE_CONFIRMED, "库存不足");
     }
 
     @Test
-    void delivery_whenOrderIdProvided_thenUpdateOrderStatusToDeliveryInProgress() {
-        orderService.delivery(ORDER_ID);
+    void startDelivery_whenOrderIdProvided_thenUpdateOrderStatusToStartDeliveryInProgress() {
+        when(orderMapper.startDelivery(ORDER_ID)).thenReturn(1);
 
-        ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
-        verify(orderMapper).update(orderCaptor.capture());
-        Orders updatedOrder = orderCaptor.getValue();
-        assertEquals(ORDER_ID, updatedOrder.getId());
-        assertEquals(Orders.DELIVERY_IN_PROGRESS, updatedOrder.getStatus());
+        orderService.startDelivery(ORDER_ID);
+
+        verify(orderMapper).startDelivery(ORDER_ID);
     }
 
     @Test
-    void complete_whenOrderIdProvided_thenUpdateOrderStatusToCompleted() {
-        orderService.complete(ORDER_ID);
+    void completeDelivery_whenOrderIdProvided_thenUpdateOrderStatusToCompleted() {
+        when(orderMapper.completeDelivery(ORDER_ID)).thenReturn(1);
 
-        ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
-        verify(orderMapper).update(orderCaptor.capture());
-        Orders updatedOrder = orderCaptor.getValue();
-        assertEquals(ORDER_ID, updatedOrder.getId());
-        assertEquals(Orders.COMPLETED, updatedOrder.getStatus());
+        orderService.completeDelivery(ORDER_ID);
+
+        verify(orderMapper).completeDelivery(ORDER_ID);
     }
 
     @Test
@@ -383,14 +391,17 @@ class OrderServiceTest {
         dto.setId(ORDER_ID);
         dto.setCancelReason("用户取消");
 
+        Orders existingOrder = Orders.builder()
+                .id(ORDER_ID)
+                .status(Orders.PENDING_PAYMENT)
+                .build();
+        when(orderMapper.getById(ORDER_ID)).thenReturn(existingOrder);
+        when(orderMapper.cancelOrder(ORDER_ID, Orders.PENDING_PAYMENT, "用户取消")).thenReturn(1);
+
         orderService.cancel(dto);
 
-        ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
-        verify(orderMapper).update(orderCaptor.capture());
-        Orders updatedOrder = orderCaptor.getValue();
-        assertEquals(ORDER_ID, updatedOrder.getId());
-        assertEquals(Orders.CANCELLED, updatedOrder.getStatus());
-        assertEquals("用户取消", updatedOrder.getCancelReason());
+        verify(orderMapper).getById(ORDER_ID);
+        verify(orderMapper).cancelOrder(ORDER_ID, Orders.PENDING_PAYMENT, "用户取消");
     }
 
     @Test

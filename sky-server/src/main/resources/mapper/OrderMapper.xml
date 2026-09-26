@@ -113,7 +113,10 @@
         select
             sum(case when status = 2 then 1 else 0 end) toBeConfirmed,
             sum(case when status = 3 then 1 else 0 end) confirmed,
-            sum(case when status = 4 then 1 else 0 end) deliveryInProgress
+            sum(case when status = 4 then 1 else 0 end) deliveryInProgress,
+            sum(case when status = 5 then 1 else 0 end) completed,
+            sum(case when status = 6 then 1 else 0 end) cancelled,
+            sum(case when status != 1 then 1 else 0 end) total
         from orders
     </select>
 </mapper>

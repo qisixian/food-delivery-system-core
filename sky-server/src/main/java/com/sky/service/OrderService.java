@@ -36,13 +36,13 @@ public interface OrderService {
 
     PageResult<Orders> pageQuery(OrdersPageQueryDTO ordersPageQueryDTO);
 
-    void confirm(OrdersConfirmDTO ordersConfirmDTO);
+    void confirm(Long id);
 
-    void rejection(OrdersRejectionDTO ordersRejectionDTO);
+    void startDelivery(Long id);
 
-    void delivery(Long id);
+    void completeDelivery(Long id);
 
-    void complete(Long id);
+    void reject(OrdersRejectionDTO ordersRejectionDTO);
 
     void cancel(OrdersCancelDTO ordersCancelDTO);
 
