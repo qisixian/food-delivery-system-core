@@ -50,8 +50,9 @@ public interface OrderMapper {
         WHERE id = #{id}
           AND status = 1
           AND pay_status = 0
+          AND user_id = #{userId}
     """)
-    int payOrder(Long id, LocalDateTime checkoutTime);
+    int payOrder(Long id, LocalDateTime checkoutTime, Long userId);
 
     @Update("update orders set status = 3 where id = #{id} and status = 2")
     int acceptOrder(Long id);

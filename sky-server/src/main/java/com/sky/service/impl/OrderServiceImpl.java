@@ -68,6 +68,9 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(MessageConstant.ORDER_DELIVERY_ADDRESS_REQUIRED);
         }
         Long userId = userContext.get();
+        if (!addressBook.getUserId().equals(userId)) {
+            throw new BusinessException(MessageConstant.ORDER_DELIVERY_ADDRESS_REQUIRED);
+        }
         ShoppingCart shoppingCart = ShoppingCart.builder()
                 .userId(userId)
                 .build();
@@ -160,7 +163,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
 
-        int rows = orderMapper.payOrder(ordersDB.getId(), LocalDateTime.now(clock));
+        int rows = orderMapper.payOrder(ordersDB.getId(), LocalDateTime.now(clock), userContext.get());
         if (rows == 0) {
             // todo: 区分重复支付处理、订单已取消等情况。真实支付接入后，“钱已支付但订单已取消”还需要记录支付事实并进入退款等后续流程
             throw new BusinessException(MessageConstant.ORDER_STATUS_ERROR);

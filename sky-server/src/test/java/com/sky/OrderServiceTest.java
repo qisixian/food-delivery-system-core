@@ -187,15 +187,17 @@ class OrderServiceTest {
         Orders existingOrder = Orders.builder()
                 .id(ORDER_ID)
                 .number(orderNumber)
+                .userId(USER_ID)
                 .build();
         when(orderMapper.getByNumber(orderNumber)).thenReturn(existingOrder);
-        when(orderMapper.payOrder(ORDER_ID, ORDER_TIME)).thenReturn(1);
+        when(userContext.get()).thenReturn(USER_ID);
+        when(orderMapper.payOrder(ORDER_ID, ORDER_TIME, USER_ID)).thenReturn(1);
         stubFixedClock();
 
         orderService.paySuccess(orderNumber);
 
         verify(orderMapper).getByNumber(orderNumber);
-        verify(orderMapper).payOrder(ORDER_ID, ORDER_TIME);
+        verify(orderMapper).payOrder(ORDER_ID, ORDER_TIME, USER_ID);
 
         ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
         verify(webSocketServer).sendToAllClient(messageCaptor.capture());
@@ -211,9 +213,11 @@ class OrderServiceTest {
         Orders existingOrder = Orders.builder()
                 .id(ORDER_ID)
                 .number(orderNumber)
+                .userId(USER_ID)
                 .build();
         when(orderMapper.getByNumber(orderNumber)).thenReturn(existingOrder);
-        when(orderMapper.payOrder(ORDER_ID, ORDER_TIME)).thenReturn(0);
+        when(userContext.get()).thenReturn(USER_ID);
+        when(orderMapper.payOrder(ORDER_ID, ORDER_TIME, USER_ID)).thenReturn(0);
         stubFixedClock();
 
         BusinessException exception = assertThrows(
@@ -222,7 +226,7 @@ class OrderServiceTest {
         );
 
         assertEquals(MessageConstant.ORDER_STATUS_ERROR, exception.getMessage());
-        verify(orderMapper).payOrder(ORDER_ID, ORDER_TIME);
+        verify(orderMapper).payOrder(ORDER_ID, ORDER_TIME, USER_ID);
         verifyNoInteractions(webSocketServer);
     }
 
