@@ -222,11 +222,14 @@ CREATE TABLE `shopping_cart` (
   `user_id` bigint NOT NULL COMMENT '主键',
   `dish_id` bigint DEFAULT NULL COMMENT '菜品id',
   `setmeal_id` bigint DEFAULT NULL COMMENT '套餐id',
-  `dish_flavor` varchar(50) COLLATE utf8_bin DEFAULT NULL COMMENT '口味',
+  `dish_flavor` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT '口味',
   `number` int NOT NULL DEFAULT '1' COMMENT '数量',
   `amount` decimal(10,2) NOT NULL COMMENT '金额',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  `setmeal_key` bigint GENERATED ALWAYS AS (COALESCE(`setmeal_id`, 0)) VIRTUAL,
+  `dish_key` bigint GENERATED ALWAYS AS (COALESCE(`dish_id`, 0)) VIRTUAL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_cart_item` (`user_id`, `setmeal_key`, `dish_key`, `dish_flavor`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='购物车';
 
 DROP TABLE IF EXISTS `user`;
