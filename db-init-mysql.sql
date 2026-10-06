@@ -17,7 +17,8 @@ CREATE TABLE `address_book` (
   `detail` varchar(200) CHARACTER SET utf8mb4  DEFAULT NULL COMMENT '详细地址',
   `label` varchar(100) CHARACTER SET utf8mb4  DEFAULT NULL COMMENT '标签',
   `is_default` tinyint(1) NOT NULL DEFAULT '0' COMMENT '默认 0 否 1是',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_address_user_default` (`user_id`, `is_default`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='地址簿';
 
 DROP TABLE IF EXISTS `category`;
@@ -60,7 +61,8 @@ CREATE TABLE `dish` (
   `create_user` bigint DEFAULT NULL COMMENT '创建人',
   `update_user` bigint DEFAULT NULL COMMENT '修改人',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_dish_name` (`name`)
+  UNIQUE KEY `idx_dish_name` (`name`),
+  KEY `idx_dish_category_status_time` (`category_id`, `status`, `create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='菜品';
 
 INSERT INTO `dish` VALUES (46,'王老吉',11,6.00,'https://sky-itcast.oss-cn-beijing.aliyuncs.com/41bfcacf-7ad4-4927-8b26-df366553a94c.png','',1,'2022-06-09 22:40:47','2022-06-09 22:40:47',1,1);
@@ -94,7 +96,8 @@ CREATE TABLE `dish_flavor` (
   `dish_id` bigint NOT NULL COMMENT '菜品',
   `name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT '口味名称',
   `value` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '口味数据list',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_dish_flavor_dish` (`dish_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='菜品口味关系表';
 
 INSERT INTO `dish_flavor` VALUES (40,10,'甜味','[\"无糖\",\"少糖\",\"半糖\",\"多糖\",\"全糖\"]');
@@ -153,7 +156,8 @@ CREATE TABLE `order_detail` (
   `dish_flavor` varchar(50) COLLATE utf8_bin DEFAULT NULL COMMENT '口味',
   `number` int NOT NULL DEFAULT '1' COMMENT '数量',
   `amount` decimal(10,2) NOT NULL COMMENT '金额',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_order_detail_order` (`order_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='订单明细表';
 
 DROP TABLE IF EXISTS `orders`;
@@ -183,7 +187,8 @@ CREATE TABLE `orders` (
   `tableware_number` int DEFAULT NULL COMMENT '餐具数量',
   `tableware_status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '餐具数量状态  1按餐量提供  0选择具体数量',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_orders_number` (`number`)
+  UNIQUE KEY `uk_orders_number` (`number`),
+  KEY `idx_orders_user_time` (`user_id`, `order_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='订单表';
 
 DROP TABLE IF EXISTS `setmeal`;
@@ -211,7 +216,8 @@ CREATE TABLE `setmeal_dish` (
   `name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT '菜品名称 （冗余字段）',
   `price` decimal(10,2) DEFAULT NULL COMMENT '菜品单价（冗余字段）',
   `copies` int DEFAULT NULL COMMENT '菜品份数',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_setmeal_dish_setmeal` (`setmeal_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='套餐菜品关系';
 
 DROP TABLE IF EXISTS `shopping_cart`;
