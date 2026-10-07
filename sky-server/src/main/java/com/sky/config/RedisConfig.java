@@ -9,6 +9,7 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -52,7 +53,10 @@ public class RedisConfig implements CachingConfigurer {
             RuntimeException ex, Cache cache, Object key, String operation) {
 
         // 所有缓存均允许在 Redis 连接失败时降级
-        if (!(ex instanceof RedisConnectionFailureException)) {
+        boolean canFallback = ex instanceof RedisConnectionFailureException
+                || ex instanceof QueryTimeoutException;
+
+        if (!canFallback) {
             throw ex;
         }
 

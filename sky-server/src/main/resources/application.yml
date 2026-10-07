@@ -17,6 +17,8 @@ spring:
       port: ${sky.redis.port}
       password: ${sky.redis.password}
       database: ${sky.redis.database}
+      connect-timeout: 1s
+      timeout: 1s
 
 management:
   endpoints:
