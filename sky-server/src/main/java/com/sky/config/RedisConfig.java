@@ -2,9 +2,11 @@ package com.sky.config;
 
 import com.sky.constant.CacheConstant;
 import com.sky.constant.LogFields;
+import com.sky.utils.LogRateLimiter;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientOptionsBuilderCustomizer;
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -19,9 +21,30 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.time.Duration;
+import java.util.Map;
+
 @Slf4j
 @Configuration
 public class RedisConfig implements CachingConfigurer {
+
+
+    private final Duration logRateLimitInterval;
+    private final Map<CacheFailureType, LogRateLimiter> failureLimiters;
+
+    public RedisConfig(
+            @Value("${sky.logging.rate-limit.interval}")
+            Duration logRateLimitInterval) {
+
+        this.logRateLimitInterval = logRateLimitInterval;
+
+        this.failureLimiters = Map.of(
+                CacheFailureType.CONNECTION_UNAVAILABLE,
+                new LogRateLimiter(logRateLimitInterval),
+                CacheFailureType.COMMAND_TIMEOUT,
+                new LogRateLimiter(logRateLimitInterval)
+        );
+    }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
@@ -40,6 +63,26 @@ public class RedisConfig implements CachingConfigurer {
                 .disconnectedBehavior(
                         ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
     }
+
+    private enum CacheFailureType {
+        CONNECTION_UNAVAILABLE,
+        COMMAND_TIMEOUT,
+        UNKNOWN_FAILURE
+    }
+
+    private CacheFailureType classifyFailure(RuntimeException ex) {
+        if (ex instanceof RedisConnectionFailureException
+                || isDisconnectedCommandRejection(ex)) {
+            return CacheFailureType.CONNECTION_UNAVAILABLE;
+        }
+
+        if (ex instanceof QueryTimeoutException) {
+            return CacheFailureType.COMMAND_TIMEOUT;
+        }
+
+        return CacheFailureType.UNKNOWN_FAILURE;
+    }
+
 
     @Bean
     @Override
@@ -64,23 +107,26 @@ public class RedisConfig implements CachingConfigurer {
     private void handleConnectionFailure(
             RuntimeException ex, Cache cache, Object key, String operation) {
 
-        // 所有缓存均允许在 Redis 连接失败时降级
-        boolean canFallback = ex instanceof RedisConnectionFailureException
-                || ex instanceof QueryTimeoutException
-                || isDisconnectedCommandRejection(ex);
+        CacheFailureType type = classifyFailure(ex);
 
-        if (!canFallback) {
+        if (type == CacheFailureType.UNKNOWN_FAILURE) {
             throw ex;
         }
 
-        log.atWarn()
-                .addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName())
-                .addKeyValue("event", "cache_degraded")
-                .addKeyValue("operation", operation)
-                .addKeyValue("cache", cache.getName())
-                .addKeyValue("key", key)
-                .setCause(ex)
-                .log("Redis unavailable; continuing without cache");
+        LogRateLimiter.Decision decision = failureLimiters.get(type).tryAcquire();
+
+        if (decision.allowed()) {
+            log.atWarn()
+                    .addKeyValue(LogFields.EXCEPTION_CLASS_NAME, ex.getClass().getName())
+                    .addKeyValue("event", "cache_degraded")
+                    .addKeyValue("operation", operation)
+                    .addKeyValue("cache", cache.getName())
+                    .addKeyValue("key", key)
+                    .addKeyValue("suppressed_count", decision.suppressedCount())
+                    .addKeyValue("log_interval_seconds", logRateLimitInterval.toSeconds())
+                    .setCause(ex)
+                    .log("Redis unavailable; continuing without cache");
+        }
     }
 
     private boolean isDisconnectedCommandRejection(RuntimeException ex) {
