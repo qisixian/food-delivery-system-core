@@ -22,7 +22,8 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [debug, otlp/tempo]
+      exporters: [otlp/tempo]
+#      exporters: [debug, otlp/tempo]
     logs:
       receivers: [otlp]
       exporters: [otlphttp/loki]
