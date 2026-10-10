@@ -15,7 +15,7 @@ spring:
     username: ${sky.datasource.username}
     password: ${sky.datasource.password}
     hikari:
-      maximum-pool-size: 20
+      maximum-pool-size: 40
   data:
     redis:
       host: ${sky.redis.host}
