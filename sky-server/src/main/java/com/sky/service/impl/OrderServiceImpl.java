@@ -106,10 +106,6 @@ public class OrderServiceImpl implements OrderService {
         // 清空购物车
         shoppingCartMapper.deleteByUserId(userId);
 
-        log.atInfo()
-            .addKeyValue(LogFields.ORDER_ID, orders.getId())
-            .log("Submit order success");
-
         // 返回结果
         OrderSubmitVO orderSubmitVO = OrderSubmitVO.builder()
                 .id(orders.getId())
