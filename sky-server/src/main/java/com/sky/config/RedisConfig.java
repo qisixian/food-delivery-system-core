@@ -7,6 +7,7 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientOptionsBuilderCustomizer;
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -23,6 +24,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Configuration
@@ -54,6 +56,21 @@ public class RedisConfig implements CachingConfigurer {
         // 默认序列化存入的是16进制？不用String的序列号，就会乱码？
         template.setKeySerializer(new StringRedisSerializer());
         return template;
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer cacheTtlCustomizer(
+            @Value("${spring.cache.redis.time-to-live}") Duration baseTtl) {
+        return builder -> {
+            var configuration = builder.cacheDefaults()
+                    .entryTtl((key, value) -> baseTtl.plusSeconds(
+                            ThreadLocalRandom.current().nextLong(301)));
+
+            builder.withCacheConfiguration(
+                    CacheConstant.DISH_CATEGORY_LIST, configuration);
+            builder.withCacheConfiguration(
+                    CacheConstant.SETMEAL_CATEGORY_LIST, configuration);
+        };
     }
 
     @Bean

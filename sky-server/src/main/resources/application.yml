@@ -24,6 +24,10 @@ spring:
       database: ${sky.redis.database}
       connect-timeout: 1s
       timeout: 1s
+  cache:
+    type: redis
+    redis:
+      time-to-live: 30m
 
 management:
   endpoints:
