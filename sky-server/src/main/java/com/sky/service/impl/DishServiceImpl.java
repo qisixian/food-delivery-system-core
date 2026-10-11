@@ -140,6 +140,7 @@ public class DishServiceImpl implements DishService {
     public List<DishVO> listWithFlavor(Long categoryId) {
         List<Dish> dishList = dishMapper.listByCategoryId(categoryId);
 
+        List<DishFlavor> flavorsForDishes = dishFlavorMapper.getByDishIds(dishList.stream().map(Dish::getId).toList());
 
         List<DishVO> dishVOList = new ArrayList<>();
 
@@ -148,9 +149,9 @@ public class DishServiceImpl implements DishService {
             BeanUtils.copyProperties(d,dishVO);
 
             //根据菜品id查询对应的口味
-            List<DishFlavor> flavors = dishFlavorMapper.getByDishId(d.getId());
+            List<DishFlavor> dishFlavors = flavorsForDishes.stream().filter(flavor -> flavor.getDishId().equals(d.getId())).toList();
 
-            dishVO.setFlavors(flavors);
+            dishVO.setFlavors(dishFlavors);
             dishVOList.add(dishVO);
         }
 

@@ -13,6 +13,8 @@ public interface DishFlavorMapper {
     @Select("select * from dish_flavor where dish_id = #{dishId}")
     List<DishFlavor> getByDishId(Long dishId);
 
+    List<DishFlavor> getByDishIds(List<Long> dishIds);
+
     void insertBatch(List<DishFlavor> flavors);
 
     @Delete("delete from dish_flavor where dish_id = #{dishId}")
