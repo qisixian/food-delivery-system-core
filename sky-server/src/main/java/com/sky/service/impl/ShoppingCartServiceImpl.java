@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -96,6 +97,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         return shoppingCartMapper.list(cart);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void cleanShoppingCart() {
         Long userId = userContext.get();
         shoppingCartMapper.deleteByUserId(userId);
