@@ -41,6 +41,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Autowired
     private Clock clock;
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void addShoppingCart(ShoppingCartDTO shoppingCartDTO) {
         ShoppingCart shoppingCart = new ShoppingCart();
         BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
@@ -75,7 +76,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void removeShoppingCart(ShoppingCartDTO shoppingCartDTO) {
         if (shoppingCartDTO.getDishFlavor() == null) {
             shoppingCartDTO.setDishFlavor("");
