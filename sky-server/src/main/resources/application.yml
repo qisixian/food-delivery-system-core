@@ -34,6 +34,11 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus # loggers # 需要鉴权保护
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "hikaricp.connections.usage": true
+        "hikaricp.connections.acquire": true
 
 mybatis:
   #mapper配置文件
