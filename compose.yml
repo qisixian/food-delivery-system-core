@@ -1,7 +1,7 @@
 services:
 
   food-delivery-system-core:
-    image: food-delivery-system-core:latest
+    image: ghcr.io/qisixian/food-delivery-system-core:latest
     container_name: food-delivery-system-core
     ports:
       - "8080:8080"

@@ -29,6 +29,22 @@ podman rmi food-delivery-system-core
 podman pull ghcr.io/qisixian/food-delivery-system-core:latest
 
 
+用 compose pull 新镜像
+podman compose pull food-delivery-system-core
+
+找到当前容器的老镜像ID
+podman container inspect food-delivery-system-core --format '{{.Image}}'
+
+更新镜像
+podman compose up -d --no-deps --force-recreate food-delivery-system-core
+
+按ID删除老镜像：
+podman rmi 30172b9f93a81eca336d0e15a3bf2f6b312f0b2bc61a73e77f5a370bccf4bb43
+
+如果需要停止镜像
+podman compose stop food-delivery-system-core
+
+
 ##### otel-collector
 
 podman pull otel/opentelemetry-collector:0.154.0
@@ -60,6 +76,7 @@ podman start prometheus
 podman stop prometheus
 podman rm prometheus
 
+http://localhost:9090/query
 
 ##### loki
 
@@ -108,7 +125,16 @@ podman run -d \
     
 podman stop grafana
 podman rm grafana
+
+http://localhost:3000/login
+connections -> data source -> add new data source -> prometheus -> Prometheus server URL: http://host.containers.internal:9090
+connections -> data source -> add new data source -> loki -> URL: http://host.containers.internal:3100
+connections -> data source -> add new data source -> tempo -> URL: http://host.containers.internal:3200
+explore -> prometheus -> [Builder❌->Code✅] -> Query: up{job="food-delivery-system-core"} -> Run query
+explore -> loki -> Label filters: service_name = food-delivery-system-core -> Run query
+explore -> tempo -> Query type: search -> Run query
     
+
 #### into the container
 podman machine ssh
 podman exec -it otel-collector sh
