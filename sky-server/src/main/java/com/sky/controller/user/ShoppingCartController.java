@@ -4,6 +4,7 @@ import com.sky.context.UserContext;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.ShoppingCart;
 import com.sky.result.Result;
+import com.sky.service.ShoppingCartRetryService;
 import com.sky.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,17 +21,20 @@ public class ShoppingCartController {
     private ShoppingCartService shoppingCartService;
 
     @Autowired
+    private ShoppingCartRetryService shoppingCartRetryService;
+
+    @Autowired
     private UserContext userContext;
 
     @PostMapping("/add")
     public Result<Void> add(@RequestBody ShoppingCartDTO shoppingCartDTO) {
-        shoppingCartService.addShoppingCart(shoppingCartDTO);
+        shoppingCartRetryService.addShoppingCart(shoppingCartDTO);
         return Result.success();
     }
 
     @PostMapping("/sub")
     public Result<Void> sub(@RequestBody ShoppingCartDTO shoppingCartDTO) {
-        shoppingCartService.removeShoppingCart(shoppingCartDTO);
+        shoppingCartRetryService.removeShoppingCart(shoppingCartDTO);
         return Result.success();
     }
 
@@ -46,7 +50,7 @@ public class ShoppingCartController {
 
     @DeleteMapping("/clean")
     public Result<Void> clean() {
-        shoppingCartService.cleanShoppingCart();
+        shoppingCartRetryService.cleanShoppingCart();
         return Result.success();
     }
 }
